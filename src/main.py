@@ -458,9 +458,9 @@ class ExperimentApp:
         info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         info_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Add dummy instruction text
+        # Dummy instruction text
         instruction_text = """
-        Study the word pairs carefully. You have 8 minutes to memorize the associations between the Icelandic and English words.
+        Study the word pairs carefully. You have 4 minutes to memorize the associations between the Icelandic and English words.
 
         After the time expires, you will be tested on your remembrance of these word pairs.
 
@@ -559,7 +559,7 @@ class ExperimentApp:
 
     def start_countdown_timer(self):
         """Start the 8-minute countdown timer for FIRST memorization"""
-        self.time_remaining = 8 * 60  # 8 minutes in seconds
+        self.time_remaining = 4 * 60  # 4 minutes in seconds
         self.update_first_timer()
 
     def update_first_timer(self):
@@ -606,8 +606,8 @@ class ExperimentApp:
         self.show_break_screen()
 
     def start_second_countdown_timer(self):
-        """Start the 8-minute countdown timer for SECOND memorization"""
-        self.time_remaining_2 = 8 * 60  # 8 minutes in seconds
+        """Start the 4-minute countdown timer for SECOND memorization"""
+        self.time_remaining_2 = 4 * 60  # 4 minutes in seconds
         self.update_second_timer()
 
     def update_second_timer(self):
@@ -992,19 +992,10 @@ class ExperimentApp:
         break_text = """
         Great job completing the first test!
 
-        You have now finished the first memory test. Take a moment to relax and rest your mind.
-
-        During this break, you can:
-        • Take a deep breath and relax
-        • Stretch if you need to
-        • Clear your mind from the previous task
+        You have now finished the first memory test.
 
         The next part of the experiment will begin when you click the "Next" button below.
-
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
+        
         When you're ready to continue with the next phase of the experiment, please click the "Next" button.
 
         Thank you for your continued participation in this cognitive science research!
@@ -1204,7 +1195,7 @@ class ExperimentApp:
 
         # Add instruction text for second memorization session
         instruction_text = """
-        Review the word pairs again. You have 8 minutes to refresh your memory of the associations between the Icelandic and English words.
+        Review the word pairs again. You have 4 minutes to refresh your memory of the associations between the Icelandic and English words.
 
         After the time expires, you will be tested again on your remembrance of these word pairs. The questions will be presented in a different order.
 
