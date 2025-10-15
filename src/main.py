@@ -151,7 +151,7 @@ class ExperimentApp:
         filename = f"data/experiment_{self.unique_id}_{timestamp}.csv"
 
         # Ensure data directory exists
-        os.makedirs("data", exist_ok=True)
+        os.makedirs("../data", exist_ok=True)
 
         # Prepare data for CSV
         csv_data = []
@@ -613,7 +613,7 @@ class ExperimentApp:
         """Calculate test scores and show results on final screen"""
         try:
             # Find the most recent CSV file for this session
-            data_dir = "data"
+            data_dir = "../data"
             csv_files = [f for f in os.listdir(data_dir) if f.startswith(f"experiment_{self.unique_id}") and f.endswith('.csv')]
 
             if csv_files:

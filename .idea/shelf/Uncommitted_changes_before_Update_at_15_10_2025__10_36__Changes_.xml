@@ -1,0 +1,9 @@
+<changelist name="Uncommitted_changes_before_Update_at_15_10_2025,_10_36_[Changes]" date="1760517370088" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_15_10_2025,_10_36_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 15/10/2025, 10.36 [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="src/word_pairs/dummy_words.xlsx" />
+    <option name="AFTER_PATH" value="src/word_pairs/dummy_words.xlsx" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_15_10_2025,_10_36_[Changes]/dummy_words.xlsx" />
+  </binary>
+</changelist>

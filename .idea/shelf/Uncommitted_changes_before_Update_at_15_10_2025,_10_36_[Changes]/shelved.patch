@@ -1,0 +1,722 @@
+Index: src/second_test_screen.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import tkinter as tk\nimport pandas as pd\nimport os\nimport random\n\n\nclass SecondTestScreen:\n    def __init__(self, root, word_data, unique_id, completion_callback=None):\n        \"\"\"\n        Initialize the second test screen with randomized question order\n\n        Args:\n            root: The tkinter root window\n            word_data: DataFrame with word pairs\n            unique_id: Unique session identifier\n            completion_callback: Function to call when test is completed\n        \"\"\"\n        self.root = root\n        self.word_data = word_data\n        self.unique_id = unique_id\n        self.completion_callback = completion_callback\n\n        # Create randomized question order\n        self.question_indices = list(range(len(self.word_data)))\n        random.shuffle(self.question_indices)  # Randomize the order\n\n        # Initialize test variables\n        self.current_question = 0\n        self.answers = {}  # Store answers by word_id (not question index)\n        self.total_questions = min(20, len(self.word_data))\n\n        # Timer variables\n        self.time_remaining = 3 * 60  # 3 minutes in seconds\n        self.timer_display = None\n\n        # UI components\n        self.question_cards = []\n        self.card_frames = []\n        self.question_label = None\n        self.answer_entry = None\n        self.prev_button = None\n        self.next_button = None\n\n        print(f\"Second test created with randomized order: {self.question_indices[:5]}...\")\n\n        self.setup_ui()\n\n    def setup_ui(self):\n        \"\"\"Setup the test screen user interface\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Main container\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)\n\n        # Timer in upper left corner\n        timer_frame = tk.Frame(main_frame, bg='white')\n        timer_frame.pack(anchor='nw', pady=(0, 10))\n\n        timer_label = tk.Label(timer_frame, text=\"Time Remaining:\", font=(\"Arial\", 12, \"bold\"), bg='white')\n        timer_label.pack()\n\n        self.timer_display = tk.Label(timer_frame, text=\"03:00\", font=(\"Arial\", 20, \"bold\"),\n                                    bg='white', fg='red')\n        self.timer_display.pack()\n\n        # Question cards directly under timer (smaller size)\n        cards_title = tk.Label(timer_frame, text=\"Questions\", font=(\"Arial\", 10, \"bold\"), bg='white')\n        cards_title.pack(pady=(15, 5))\n\n        # Create smaller 4x5 grid of question cards\n        grid_frame = tk.Frame(timer_frame, bg='white')\n        grid_frame.pack()\n\n        self.question_cards = []\n        self.card_frames = []\n        for row in range(4):\n            for col in range(5):\n                num = row * 5 + col + 1\n                if num <= self.total_questions:\n                    # Create smaller border frame\n                    border_frame = tk.Frame(grid_frame, bg='red', bd=0)\n                    border_frame.grid(row=row, column=col, padx=1, pady=1)\n\n                    # Create smaller card\n                    card = tk.Label(border_frame, text=str(num), font=(\"Arial\", 8, \"bold\"),\n                                  bg='white', width=3, height=1, relief=tk.FLAT)\n                    card.pack(padx=2, pady=2)\n                    card.bind('<Button-1>', lambda e, q=num-1: self.jump_to_question(q))\n\n                    self.question_cards.append(card)\n                    self.card_frames.append(border_frame)\n\n        # Title (centered)\n        title = tk.Label(main_frame, text=\"Second Test Screen\", font=(\"Arial\", 24, \"bold\"), bg='white')\n        title.pack(pady=10)\n\n        # Centered content area\n        center_frame = tk.Frame(main_frame, bg='white')\n        center_frame.pack(expand=True)\n\n        # Question display (centered)\n        self.question_label = tk.Label(center_frame, text=\"\", font=(\"Arial\", 32, \"bold\"), bg='white')\n        self.question_label.pack(pady=(50, 30))\n\n        # Navigation area (centered)\n        nav_frame = tk.Frame(center_frame, bg='white')\n        nav_frame.pack()\n\n        # Input instruction\n        instruction = tk.Label(nav_frame, text=\"Enter English translation:\", font=(\"Arial\", 14), bg='white')\n        instruction.pack(pady=(0, 10))\n\n        # Button and input layout (centered)\n        button_input_frame = tk.Frame(nav_frame, bg='white')\n        button_input_frame.pack()\n\n        # Previous button (left)\n        self.prev_button = tk.Button(button_input_frame, text=\"Previous\", font=(\"Arial\", 12),\n                                   bg='lightgray', command=self.previous_question, width=10, height=2)\n        self.prev_button.grid(row=0, column=0, padx=10, pady=5)\n\n        # Input field (center)\n        self.answer_entry = tk.Entry(button_input_frame, font=(\"Arial\", 16), width=25, justify='center')\n        self.answer_entry.grid(row=0, column=1, padx=10, pady=5)\n        self.answer_entry.bind('<KeyRelease>', self.on_answer_changed)\n        self.answer_entry.focus()\n\n        # Next button (right)\n        self.next_button = tk.Button(button_input_frame, text=\"Next\", font=(\"Arial\", 12),\n                                   bg='lightgray', command=self.next_question, width=10, height=2)\n        self.next_button.grid(row=0, column=2, padx=10, pady=5)\n\n        # Finish Test button for easy testing (centered below)\n        finish_frame = tk.Frame(center_frame, bg='white')\n        finish_frame.pack(pady=(20, 0))\n\n        self.finish_test_button = tk.Button(finish_frame, text=\"Finish Second Test (Testing)\",\n                                          font=(\"Arial\", 12), bg='purple', fg='white',\n                                          command=self.finish_test, width=25, height=2)\n        self.finish_test_button.pack()\n\n        # Start with first question\n        self.display_current_question()\n\n        # Start the 3-minute countdown timer\n        self.start_timer()\n\n    def get_current_word_id(self):\n        \"\"\"Get the word_id for the current randomized question\"\"\"\n        if self.current_question < len(self.question_indices):\n            randomized_index = self.question_indices[self.current_question]\n            if randomized_index < len(self.word_data):\n                row = self.word_data.iloc[randomized_index]\n                return row.get('word_id', randomized_index + 1)\n        return None\n\n    def display_current_question(self):\n        \"\"\"Display the current question (in randomized order)\"\"\"\n        if self.current_question < len(self.question_indices):\n            # Get the randomized question index\n            randomized_index = self.question_indices[self.current_question]\n\n            if randomized_index < len(self.word_data):\n                row = self.word_data.iloc[randomized_index]\n                icelandic_word = row.get('ice', '')\n                word_id = row.get('word_id', randomized_index + 1)\n\n                self.question_label.config(text=icelandic_word)\n\n                # Show existing answer if any (stored by word_id)\n                existing_answer = self.answers.get(word_id, '')\n                self.answer_entry.delete(0, tk.END)\n                self.answer_entry.insert(0, existing_answer)\n\n                # Update card colors\n                self.update_all_cards()\n\n                # Update button states\n                self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')\n                self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')\n\n    def update_all_cards(self):\n        \"\"\"Update all question card colors based on answer status\"\"\"\n        for i in range(len(self.question_cards)):\n            card = self.question_cards[i]\n            border_frame = self.card_frames[i]\n\n            # Get the word_id for this card position\n            if i < len(self.question_indices):\n                randomized_index = self.question_indices[i]\n                if randomized_index < len(self.word_data):\n                    row = self.word_data.iloc[randomized_index]\n                    word_id = row.get('word_id', randomized_index + 1)\n\n                    if word_id in self.answers and self.answers[word_id].strip():\n                        # Answered - green border\n                        border_frame.config(bg='green')\n                    else:\n                        # Unanswered - red border\n                        border_frame.config(bg='red')\n\n            # Current question highlight\n            if i == self.current_question:\n                card.config(bg='lightblue')\n            else:\n                card.config(bg='white')\n\n    def on_answer_changed(self, event=None):\n        \"\"\"Handle answer change - save on every keystroke using word_id\"\"\"\n        answer = self.answer_entry.get().strip()\n        word_id = self.get_current_word_id()\n        if word_id is not None:\n            self.answers[word_id] = answer\n            self.update_all_cards()\n\n    def previous_question(self):\n        \"\"\"Go to previous question\"\"\"\n        if self.current_question > 0:\n            self.current_question -= 1\n            self.display_current_question()\n\n    def next_question(self):\n        \"\"\"Go to next question\"\"\"\n        if self.current_question < self.total_questions - 1:\n            self.current_question += 1\n            self.display_current_question()\n\n    def jump_to_question(self, question_index):\n        \"\"\"Jump to a specific question when card is clicked\"\"\"\n        if 0 <= question_index < self.total_questions:\n            self.current_question = question_index\n            self.display_current_question()\n\n    def start_timer(self):\n        \"\"\"Start the 3-minute countdown timer\"\"\"\n        self.update_timer()\n\n    def update_timer(self):\n        \"\"\"Update the countdown timer display\"\"\"\n        if self.time_remaining > 0:\n            minutes = self.time_remaining // 60\n            seconds = self.time_remaining % 60\n            time_text = f\"{minutes:02d}:{seconds:02d}\"\n\n            if self.timer_display:\n                self.timer_display.config(text=time_text)\n\n                # Change color when time is running low\n                if self.time_remaining <= 30:  # Last 30 seconds\n                    self.timer_display.config(fg='red')\n                elif self.time_remaining <= 60:  # Last minute\n                    self.timer_display.config(fg='orange')\n                else:\n                    self.timer_display.config(fg='red')\n\n            self.time_remaining -= 1\n\n            # Schedule next update in 1 second\n            self.root.after(1000, self.update_timer)\n        else:\n            # Time's up!\n            if self.timer_display:\n                self.timer_display.config(text=\"00:00\", fg='red')\n            self.on_timer_finished()\n\n    def on_timer_finished(self):\n        \"\"\"Handle when the 3-minute timer reaches zero\"\"\"\n        print(\"Second test time finished!\")\n        # Save answers and complete the test\n        self.save_answers_to_csv()\n        if self.completion_callback:\n            self.completion_callback(self.answers)\n\n    def finish_test(self):\n        \"\"\"Finish the test immediately (for testing purposes)\"\"\"\n        self.time_remaining = 0\n        self.update_timer()\n\n    def save_answers_to_csv(self):\n        \"\"\"Save the answers to the CSV file in answ_2 column using word_id\"\"\"\n        try:\n            data_dir = \"data\"\n            if not os.path.exists(data_dir):\n                print(\"Data directory not found\")\n                return\n\n            csv_files = [f for f in os.listdir(data_dir)\n                        if f.startswith(f\"experiment_{self.unique_id}\") and f.endswith('.csv')]\n\n            if csv_files:\n                csv_files.sort()\n                latest_csv = os.path.join(data_dir, csv_files[-1])\n                df = pd.read_csv(latest_csv)\n\n                # Update the answ_2 column with answers using word_id matching\n                for word_id, answer in self.answers.items():\n                    # Find the row with matching word_id\n                    matching_rows = df[df['word_id'] == word_id]\n                    if not matching_rows.empty:\n                        row_index = matching_rows.index[0]\n                        df.loc[row_index, 'answ_2'] = answer\n                        print(f\"Saved answer for word_id {word_id}: '{answer}'\")\n\n                df.to_csv(latest_csv, index=False)\n                print(f\"Second test answers saved to {latest_csv}\")\n            else:\n                print(\"No CSV file found to update\")\n\n        except Exception as e:\n            print(f\"Error saving second test answers: {e}\")\n\n    def get_answers(self):\n        \"\"\"Get the current answers dictionary\"\"\"\n        return self.answers.copy()\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/second_test_screen.py b/src/second_test_screen.py
+--- a/src/second_test_screen.py	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ b/src/second_test_screen.py	(date 1759943661561)
+@@ -32,6 +32,8 @@
+         # Timer variables
+         self.time_remaining = 3 * 60  # 3 minutes in seconds
+         self.timer_display = None
++        self.timer_running = False
++        self.timer_job = None
+ 
+         # UI components
+         self.question_cards = []
+@@ -236,39 +238,61 @@
+ 
+     def start_timer(self):
+         """Start the 3-minute countdown timer"""
++        self.timer_running = True
+         self.update_timer()
+ 
++    def stop_timer(self):
++        """Stop the countdown timer"""
++        self.timer_running = False
++        if self.timer_job:
++            self.root.after_cancel(self.timer_job)
++            self.timer_job = None
++
+     def update_timer(self):
+         """Update the countdown timer display"""
++        if not self.timer_running:
++            return
++
+         if self.time_remaining > 0:
+             minutes = self.time_remaining // 60
+             seconds = self.time_remaining % 60
+             time_text = f"{minutes:02d}:{seconds:02d}"
+ 
+-            if self.timer_display:
+-                self.timer_display.config(text=time_text)
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display and self.timer_display.winfo_exists():
++                    self.timer_display.config(text=time_text)
+ 
+-                # Change color when time is running low
+-                if self.time_remaining <= 30:  # Last 30 seconds
+-                    self.timer_display.config(fg='red')
+-                elif self.time_remaining <= 60:  # Last minute
+-                    self.timer_display.config(fg='orange')
+-                else:
+-                    self.timer_display.config(fg='red')
++                    # Change color when time is running low
++                    if self.time_remaining <= 30:  # Last 30 seconds
++                        self.timer_display.config(fg='red')
++                    elif self.time_remaining <= 60:  # Last minute
++                        self.timer_display.config(fg='orange')
++                    else:
++                        self.timer_display.config(fg='red')
++            except tk.TclError:
++                # Widget has been destroyed, stop the timer
++                self.stop_timer()
++                return
+ 
+             self.time_remaining -= 1
+ 
+             # Schedule next update in 1 second
+-            self.root.after(1000, self.update_timer)
++            if self.timer_running:
++                self.timer_job = self.root.after(1000, self.update_timer)
+         else:
+             # Time's up!
+-            if self.timer_display:
+-                self.timer_display.config(text="00:00", fg='red')
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display and self.timer_display.winfo_exists():
++                    self.timer_display.config(text="00:00", fg='red')
++            except tk.TclError:
++                pass  # Widget destroyed, ignore
+             self.on_timer_finished()
+ 
+     def on_timer_finished(self):
+         """Handle when the 3-minute timer reaches zero"""
+         print("Second test time finished!")
++        # Stop the timer first
++        self.stop_timer()
+         # Save answers and complete the test
+         self.save_answers_to_csv()
+         if self.completion_callback:
+@@ -276,8 +300,10 @@
+ 
+     def finish_test(self):
+         """Finish the test immediately (for testing purposes)"""
+-        self.time_remaining = 0
+-        self.update_timer()
++        self.stop_timer()
++        self.save_answers_to_csv()
++        if self.completion_callback:
++            self.completion_callback(self.answers)
+ 
+     def save_answers_to_csv(self):
+         """Save the answers to the CSV file in answ_2 column using word_id"""
+Index: src/test_screen.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import tkinter as tk\nimport pandas as pd\nimport os\n\n\nclass TestScreen:\n    def __init__(self, root, word_data, unique_id, completion_callback=None):\n        \"\"\"\n        Initialize the test screen\n\n        Args:\n            root: The tkinter root window\n            word_data: DataFrame with word pairs\n            unique_id: Unique session identifier\n            completion_callback: Function to call when test is completed\n        \"\"\"\n        self.root = root\n        self.word_data = word_data\n        self.unique_id = unique_id\n        self.completion_callback = completion_callback\n\n        # Initialize test variables\n        self.current_question = 0\n        self.answers = {}  # Store answers by question index\n        self.total_questions = min(20, len(self.word_data))\n\n        # Timer variables\n        self.time_remaining = 3 * 60  # 3 minutes in seconds\n        self.timer_display = None\n\n        # UI components\n        self.question_cards = []\n        self.card_frames = []  # Store the border frames\n        self.question_label = None\n        self.answer_entry = None\n        self.prev_button = None\n        self.next_button = None\n\n        self.setup_ui()\n\n    def setup_ui(self):\n        \"\"\"Setup the test screen user interface\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Main container\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)\n\n        # Timer in upper left corner\n        timer_frame = tk.Frame(main_frame, bg='white')\n        timer_frame.pack(anchor='nw', pady=(0, 10))\n\n        timer_label = tk.Label(timer_frame, text=\"Time Remaining:\", font=(\"Arial\", 12, \"bold\"), bg='white')\n        timer_label.pack()\n\n        self.timer_display = tk.Label(timer_frame, text=\"03:00\", font=(\"Arial\", 20, \"bold\"),\n                                    bg='white', fg='red')\n        self.timer_display.pack()\n\n        # Question cards directly under timer (smaller size)\n        cards_title = tk.Label(timer_frame, text=\"Questions\", font=(\"Arial\", 10, \"bold\"), bg='white')\n        cards_title.pack(pady=(15, 5))\n\n        # Create smaller 4x5 grid of question cards\n        grid_frame = tk.Frame(timer_frame, bg='white')\n        grid_frame.pack()\n\n        self.question_cards = []\n        self.card_frames = []\n        for row in range(4):\n            for col in range(5):\n                num = row * 5 + col + 1\n                if num <= self.total_questions:\n                    # Create smaller border frame\n                    border_frame = tk.Frame(grid_frame, bg='red', bd=0)\n                    border_frame.grid(row=row, column=col, padx=1, pady=1)\n\n                    # Create smaller card\n                    card = tk.Label(border_frame, text=str(num), font=(\"Arial\", 8, \"bold\"),\n                                  bg='white', width=3, height=1, relief=tk.FLAT)\n                    card.pack(padx=2, pady=2)\n                    card.bind('<Button-1>', lambda e, q=num-1: self.jump_to_question(q))\n\n                    self.question_cards.append(card)\n                    self.card_frames.append(border_frame)\n\n        # Title (centered)\n        title = tk.Label(main_frame, text=\"Test Screen\", font=(\"Arial\", 24, \"bold\"), bg='white')\n        title.pack(pady=10)\n\n        # Centered content area\n        center_frame = tk.Frame(main_frame, bg='white')\n        center_frame.pack(expand=True)\n\n        # Question display (centered)\n        self.question_label = tk.Label(center_frame, text=\"\", font=(\"Arial\", 32, \"bold\"), bg='white')\n        self.question_label.pack(pady=(50, 30))\n\n        # Navigation area (centered)\n        nav_frame = tk.Frame(center_frame, bg='white')\n        nav_frame.pack()\n\n        # Input instruction\n        instruction = tk.Label(nav_frame, text=\"Enter English translation:\", font=(\"Arial\", 14), bg='white')\n        instruction.pack(pady=(0, 10))\n\n        # Button and input layout (centered)\n        button_input_frame = tk.Frame(nav_frame, bg='white')\n        button_input_frame.pack()\n\n        # Previous button (left)\n        self.prev_button = tk.Button(button_input_frame, text=\"Previous\", font=(\"Arial\", 12),\n                                   bg='lightgray', command=self.previous_question, width=10, height=2)\n        self.prev_button.grid(row=0, column=0, padx=10, pady=5)\n\n        # Input field (center)\n        self.answer_entry = tk.Entry(button_input_frame, font=(\"Arial\", 16), width=25, justify='center')\n        self.answer_entry.grid(row=0, column=1, padx=10, pady=5)\n        self.answer_entry.bind('<KeyRelease>', self.on_answer_changed)\n        self.answer_entry.focus()\n\n        # Next button (right)\n        self.next_button = tk.Button(button_input_frame, text=\"Next\", font=(\"Arial\", 12),\n                                   bg='lightgray', command=self.next_question, width=10, height=2)\n        self.next_button.grid(row=0, column=2, padx=10, pady=5)\n\n        # Finish Test button for easy testing (centered below)\n        finish_frame = tk.Frame(center_frame, bg='white')\n        finish_frame.pack(pady=(20, 0))\n\n        self.finish_test_button = tk.Button(finish_frame, text=\"Finish Test (Testing)\",\n                                          font=(\"Arial\", 12), bg='orange', fg='white',\n                                          command=self.finish_test, width=20, height=2)\n        self.finish_test_button.pack()\n\n        # Start with first question\n        self.display_current_question()\n\n        # Start the 3-minute countdown timer\n        self.start_timer()\n\n    def start_timer(self):\n        \"\"\"Start the 3-minute countdown timer\"\"\"\n        self.update_timer()\n\n    def update_timer(self):\n        \"\"\"Update the countdown timer display\"\"\"\n        if self.time_remaining > 0:\n            minutes = self.time_remaining // 60\n            seconds = self.time_remaining % 60\n            time_text = f\"{minutes:02d}:{seconds:02d}\"\n\n            if self.timer_display:\n                self.timer_display.config(text=time_text)\n\n                # Change color when time is running low\n                if self.time_remaining <= 30:  # Last 30 seconds\n                    self.timer_display.config(fg='red')\n                elif self.time_remaining <= 60:  # Last minute\n                    self.timer_display.config(fg='orange')\n                else:\n                    self.timer_display.config(fg='red')\n\n            self.time_remaining -= 1\n\n            # Schedule next update in 1 second\n            self.root.after(1000, self.update_timer)\n        else:\n            # Time's up!\n            if self.timer_display:\n                self.timer_display.config(text=\"00:00\", fg='red')\n            self.on_timer_finished()\n\n    def on_timer_finished(self):\n        \"\"\"Handle when the 3-minute timer reaches zero\"\"\"\n        print(\"Test time finished!\")\n        # Save answers and complete the test\n        self.save_answers_to_csv()\n        if self.completion_callback:\n            self.completion_callback(self.answers)\n        else:\n            # Show time's up message\n            self.show_times_up_screen()\n\n    def show_times_up_screen(self):\n        \"\"\"Show the time's up completion screen\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        completion_frame = tk.Frame(self.root, bg='white')\n        completion_frame.pack(fill=tk.BOTH, expand=True)\n\n        completion_label = tk.Label(\n            completion_frame,\n            text=\"Time's Up!\\n\\nTest Completed.\\nThank you for your participation.\",\n            font=(\"Arial\", 24, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        completion_label.pack(expand=True)\n\n    def display_current_question(self):\n        \"\"\"Display the current question\"\"\"\n        if self.current_question < len(self.word_data):\n            row = self.word_data.iloc[self.current_question]\n            icelandic_word = row.get('ice', '')\n            self.question_label.config(text=icelandic_word)\n\n            # Show existing answer\n            existing_answer = self.answers.get(self.current_question, '')\n            self.answer_entry.delete(0, tk.END)\n            self.answer_entry.insert(0, existing_answer)\n\n            # Update card colors\n            self.update_all_cards()\n\n            # Update button states\n            self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')\n            self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')\n\n    def update_all_cards(self):\n        \"\"\"Update all question card colors based on answer status\"\"\"\n        for i in range(len(self.question_cards)):\n            card = self.question_cards[i]\n            border_frame = self.card_frames[i]\n            if i in self.answers and self.answers[i].strip():\n                # Answered - green border\n                border_frame.config(bg='green')\n            else:\n                # Unanswered - red border\n                border_frame.config(bg='red')\n\n            # Current question highlight\n            if i == self.current_question:\n                card.config(bg='lightblue')\n            else:\n                card.config(bg='white')\n\n    def on_answer_changed(self, event=None):\n        \"\"\"Handle answer change - save on every keystroke\"\"\"\n        answer = self.answer_entry.get().strip()\n        self.answers[self.current_question] = answer\n        self.update_all_cards()\n\n    def previous_question(self):\n        \"\"\"Go to previous question\"\"\"\n        if self.current_question > 0:\n            self.current_question -= 1\n            self.display_current_question()\n\n    def next_question(self):\n        \"\"\"Go to next question\"\"\"\n        if self.current_question < self.total_questions - 1:\n            self.current_question += 1\n            self.display_current_question()\n\n    def jump_to_question(self, question_index):\n        \"\"\"Jump to a specific question when card is clicked\"\"\"\n        if 0 <= question_index < self.total_questions:\n            self.current_question = question_index\n            self.display_current_question()\n\n    def save_answers_to_csv(self):\n        \"\"\"Save the answers to the CSV file in answ_1 column\"\"\"\n        try:\n            data_dir = \"data\"\n            if not os.path.exists(data_dir):\n                print(\"Data directory not found\")\n                return\n\n            csv_files = [f for f in os.listdir(data_dir)\n                        if f.startswith(f\"experiment_{self.unique_id}\") and f.endswith('.csv')]\n\n            if csv_files:\n                csv_files.sort()\n                latest_csv = os.path.join(data_dir, csv_files[-1])\n                df = pd.read_csv(latest_csv)\n\n                for question_index, answer in self.answers.items():\n                    if question_index < len(df):\n                        df.loc[question_index, 'answ_1'] = answer\n\n                df.to_csv(latest_csv, index=False)\n                print(f\"Answers saved to {latest_csv}\")\n            else:\n                print(\"No CSV file found to update\")\n\n        except Exception as e:\n            print(f\"Error saving answers: {e}\")\n\n    def get_answers(self):\n        \"\"\"Get the current answers dictionary\"\"\"\n        return self.answers.copy()\n\n    def finish_test(self):\n        \"\"\"Finish the test immediately (for testing purposes)\"\"\"\n        self.time_remaining = 0\n        self.update_timer()\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test_screen.py b/src/test_screen.py
+--- a/src/test_screen.py	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ b/src/test_screen.py	(date 1759943661555)
+@@ -27,6 +27,8 @@
+         # Timer variables
+         self.time_remaining = 3 * 60  # 3 minutes in seconds
+         self.timer_display = None
++        self.timer_running = False
++        self.timer_job = None
+ 
+         # UI components
+         self.question_cards = []
+@@ -143,39 +145,61 @@
+ 
+     def start_timer(self):
+         """Start the 3-minute countdown timer"""
++        self.timer_running = True
+         self.update_timer()
+ 
++    def stop_timer(self):
++        """Stop the countdown timer"""
++        self.timer_running = False
++        if self.timer_job:
++            self.root.after_cancel(self.timer_job)
++            self.timer_job = None
++
+     def update_timer(self):
+         """Update the countdown timer display"""
++        if not self.timer_running:
++            return
++
+         if self.time_remaining > 0:
+             minutes = self.time_remaining // 60
+             seconds = self.time_remaining % 60
+             time_text = f"{minutes:02d}:{seconds:02d}"
+ 
+-            if self.timer_display:
+-                self.timer_display.config(text=time_text)
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display and self.timer_display.winfo_exists():
++                    self.timer_display.config(text=time_text)
+ 
+-                # Change color when time is running low
+-                if self.time_remaining <= 30:  # Last 30 seconds
+-                    self.timer_display.config(fg='red')
+-                elif self.time_remaining <= 60:  # Last minute
+-                    self.timer_display.config(fg='orange')
+-                else:
+-                    self.timer_display.config(fg='red')
++                    # Change color when time is running low
++                    if self.time_remaining <= 30:  # Last 30 seconds
++                        self.timer_display.config(fg='red')
++                    elif self.time_remaining <= 60:  # Last minute
++                        self.timer_display.config(fg='orange')
++                    else:
++                        self.timer_display.config(fg='red')
++            except tk.TclError:
++                # Widget has been destroyed, stop the timer
++                self.stop_timer()
++                return
+ 
+             self.time_remaining -= 1
+ 
+             # Schedule next update in 1 second
+-            self.root.after(1000, self.update_timer)
++            if self.timer_running:
++                self.timer_job = self.root.after(1000, self.update_timer)
+         else:
+             # Time's up!
+-            if self.timer_display:
+-                self.timer_display.config(text="00:00", fg='red')
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display and self.timer_display.winfo_exists():
++                    self.timer_display.config(text="00:00", fg='red')
++            except tk.TclError:
++                pass  # Widget destroyed, ignore
+             self.on_timer_finished()
+ 
+     def on_timer_finished(self):
+         """Handle when the 3-minute timer reaches zero"""
+         print("Test time finished!")
++        # Stop the timer first
++        self.stop_timer()
+         # Save answers and complete the test
+         self.save_answers_to_csv()
+         if self.completion_callback:
+@@ -297,5 +321,9 @@
+ 
+     def finish_test(self):
+         """Finish the test immediately (for testing purposes)"""
+-        self.time_remaining = 0
+-        self.update_timer()
++        self.stop_timer()
++        self.save_answers_to_csv()
++        if self.completion_callback:
++            self.completion_callback(self.answers)
++        else:
++            self.show_times_up_screen()
+Index: src/main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import tkinter as tk\nfrom tkinter import ttk\nimport pandas as pd\nimport csv\nimport uuid\nimport os\nfrom datetime import datetime\nfrom test_screen import TestScreen\nfrom second_test_screen import SecondTestScreen\n\nclass ExperimentApp:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Cognitive Science Experiment\")\n        self.root.geometry(\"800x600\")\n        self.root.configure(bg='white')\n\n        # Generate unique ID for this session\n        self.unique_id = str(uuid.uuid4())[:8]  # Short unique ID\n\n        # Load word data\n        self.word_data = self.load_word_data()\n\n        # Show welcome screen\n        self.show_welcome_screen()\n\n    def load_word_data(self):\n        \"\"\"Load word data from Excel file\"\"\"\n        try:\n            df = pd.read_excel('word_pairs/dummy_words.xlsx')\n            print(f\"Excel file loaded successfully! Shape: {df.shape}\")\n            print(f\"Columns: {df.columns.tolist()}\")\n\n            # Check if the Excel file has the expected columns\n            # Try different possible column name variations\n            ice_col = None\n            eng_col = None\n            word_id_col = None\n\n            # Look for Icelandic column (could be 'ice', 'icelandic', or index-based)\n            for col in df.columns:\n                col_str = str(col).lower()\n                if 'ice' in col_str or 'island' in col_str:\n                    ice_col = col\n                    break\n\n            # Look for English column (could be 'eng', 'english', or index-based)\n            for col in df.columns:\n                col_str = str(col).lower()\n                if 'eng' in col_str or 'english' in col_str:\n                    eng_col = col\n                    break\n\n            # Look for word_id column\n            for col in df.columns:\n                col_str = str(col).lower()\n                if 'word_id' in col_str or 'id' in col_str:\n                    word_id_col = col\n                    break\n\n            # If we can't find named columns, assume columns by position\n            if ice_col is None and eng_col is None:\n                if len(df.columns) >= 2:\n                    # Assume first column is word_id, second is Icelandic, third is English\n                    if len(df.columns) >= 3:\n                        word_id_col = df.columns[0]\n                        ice_col = df.columns[1]\n                        eng_col = df.columns[2]\n                    else:\n                        # Only 2 columns, assume they are Icelandic and English\n                        ice_col = df.columns[0]\n                        eng_col = df.columns[1]\n\n            print(f\"Using columns - word_id: {word_id_col}, ice: {ice_col}, eng: {eng_col}\")\n\n            # Create standardized DataFrame\n            result_data = []\n            for index, row in df.iterrows():\n                word_id = row[word_id_col] if word_id_col else index + 1\n                ice_word = row[ice_col] if ice_col else ''\n                eng_word = row[eng_col] if eng_col else ''\n\n                result_data.append({\n                    'word_id': word_id,\n                    'ice': ice_word,\n                    'eng': eng_word\n                })\n\n            result_df = pd.DataFrame(result_data)\n            print(f\"Processed {len(result_df)} word pairs\")\n            print(\"First few pairs:\")\n            for i in range(min(5, len(result_df))):\n                row = result_df.iloc[i]\n                print(f\"  {i+1}: {row['ice']} -> {row['eng']}\")\n\n            return result_df\n\n        except Exception as e:\n            print(f\"Error loading word data: {e}\")\n            # Create dummy data if file doesn't exist or can't be read\n            return pd.DataFrame({\n                'word_id': [1, 2, 3, 4, 5],\n                'ice': ['hestur', 'hundur', 'köttur', 'fugl', 'fiskur'],\n                'eng': ['horse', 'dog', 'cat', 'bird', 'fish']\n            })\n\n    def show_welcome_screen(self):\n        \"\"\"Display the welcome screen\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Create main frame\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True)\n\n        # Welcome message\n        welcome_label = tk.Label(\n            main_frame,\n            text=\"Welcome\",\n            font=(\"Arial\", 32, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        welcome_label.pack(expand=True)\n\n        # Next button in bottom right corner\n        button_frame = tk.Frame(main_frame, bg='white')\n        button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=20)\n\n        next_button = tk.Button(\n            button_frame,\n            text=\"Next\",\n            font=(\"Arial\", 14),\n            bg='lightblue',\n            command=self.on_next_clicked,\n            width=10,\n            height=2\n        )\n        next_button.pack(side=tk.RIGHT)\n\n    def on_next_clicked(self):\n        \"\"\"Handle next button click - create CSV and show information screen\"\"\"\n        self.create_csv_file()\n        self.show_information_screen()\n\n    def create_csv_file(self):\n        \"\"\"Create CSV file with unique name and populate with data\"\"\"\n        # Create unique filename with timestamp\n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        filename = f\"data/experiment_{self.unique_id}_{timestamp}.csv\"\n\n        # Ensure data directory exists\n        os.makedirs(\"data\", exist_ok=True)\n\n        # Prepare data for CSV\n        csv_data = []\n\n        # Add header\n        csv_data.append(['id', 'word_id', 'ice', 'eng', 'answ_1', 'answ_2'])\n\n        # Add data rows\n        for index, row in self.word_data.iterrows():\n            csv_row = [\n                self.unique_id,  # unique id\n                int(row.get('word_id', index + 1)),  # word_id from Excel or index\n                row.get('ice', ''),  # Icelandic word\n                row.get('eng', ''),  # English word\n                '',  # answ_1 - empty for now\n                ''   # answ_2 - empty for now\n            ]\n            csv_data.append(csv_row)\n\n        # Write to CSV file\n        try:\n            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:\n                writer = csv.writer(csvfile)\n                writer.writerows(csv_data)\n            print(f\"CSV file created: {filename}\")\n        except Exception as e:\n            print(f\"Error creating CSV file: {e}\")\n\n    def show_information_screen(self):\n        \"\"\"Display the information screen with dummy text\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Create main frame\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)\n\n        # Title\n        title_label = tk.Label(\n            main_frame,\n            text=\"Information\",\n            font=(\"Arial\", 24, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        title_label.pack(pady=(0, 20))\n\n        # Create text frame with scrollbar\n        text_frame = tk.Frame(main_frame, bg='white')\n        text_frame.pack(fill=tk.BOTH, expand=True)\n\n        # Text widget with scrollbar\n        text_widget = tk.Text(\n            text_frame,\n            font=(\"Arial\", 12),\n            bg='white',\n            fg='black',\n            wrap=tk.WORD,\n            padx=10,\n            pady=10\n        )\n\n        scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_widget.yview)\n        text_widget.configure(yscrollcommand=scrollbar.set)\n\n        # Pack text widget and scrollbar\n        text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)\n        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)\n\n        # Dummy text content\n        dummy_text = \"\"\"\n                Welcome to this cognitive science experiment.\n        \n        We are very grateful for your participation.\n        This experiment consists of several parts, including memorization and recall tasks.\n        First you will be presented with a list of word pairs to memorize in 8 minutes.\n        After a set period of time, you will be tested for 3 minutes on your memory of these word pairs.\n        Then you will watch YouTube short for 8 minutes.\n        Finally, you will be tested again on your memory of the word pairs for 3 minutes.\n        Your responses will be recorded in a text file for analysis.\n        \n        If you have any questions, feel free to ask the experimenter before we begin.\n        Remember you can leave the experiment at any time if you feel uncomfortable.\n        Thank you again for your participation!\n        \"\"\"\n\n        # Insert dummy text\n        text_widget.insert(tk.END, dummy_text.strip())\n        text_widget.config(state=tk.DISABLED)  # Make text read-only\n\n        # Next button in bottom right corner\n        button_frame = tk.Frame(main_frame, bg='white')\n        button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(20, 0))\n\n        next_button = tk.Button(\n            button_frame,\n            text=\"Next\",\n            font=(\"Arial\", 14),\n            bg='lightblue',\n            command=self.show_memorizing_screen,\n            width=10,\n            height=2\n        )\n        next_button.pack(side=tk.RIGHT)\n\n    def show_memorizing_screen(self):\n        \"\"\"Display the memorizing screen with word pairs, information, and countdown timer\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Create main container\n        main_container = tk.Frame(self.root, bg='white')\n        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)\n\n        # Title\n        title_label = tk.Label(\n            main_container,\n            text=\"Memorizing Screen\",\n            font=(\"Arial\", 20, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        title_label.pack(pady=(0, 10))\n\n        # Create horizontal layout: word grid on left, info panel on right\n        content_frame = tk.Frame(main_container, bg='white')\n        content_frame.pack(fill=tk.BOTH, expand=True)\n\n        # Left side: Word pairs grid (5 columns x 4 rows)\n        grid_frame = tk.Frame(content_frame, bg='white', relief=tk.RAISED, bd=1)\n        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))\n\n        # Grid title\n        grid_title = tk.Label(\n            grid_frame,\n            text=\"Word Pairs\",\n            font=(\"Arial\", 16, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        grid_title.pack(pady=10)\n\n        # Create the word grid\n        word_grid_frame = tk.Frame(grid_frame, bg='white')\n        word_grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)\n\n        # Display word pairs in 5x4 grid (20 pairs total)\n        self.display_word_grid(word_grid_frame)\n\n        # Right side: Information panel and timer\n        info_panel = tk.Frame(content_frame, bg='lightgray', width=300, relief=tk.RAISED, bd=1)\n        info_panel.pack(side=tk.RIGHT, fill=tk.Y)\n        info_panel.pack_propagate(False)  # Maintain fixed width\n\n        # Timer display\n        timer_frame = tk.Frame(info_panel, bg='lightgray')\n        timer_frame.pack(fill=tk.X, padx=10, pady=10)\n\n        timer_label = tk.Label(\n            timer_frame,\n            text=\"Time Remaining:\",\n            font=(\"Arial\", 12, \"bold\"),\n            bg='lightgray',\n            fg='black'\n        )\n        timer_label.pack()\n\n        self.timer_display = tk.Label(\n            timer_frame,\n            text=\"08:00\",\n            font=(\"Arial\", 24, \"bold\"),\n            bg='lightgray',\n            fg='red'\n        )\n        self.timer_display.pack()\n\n        # Information text area\n        info_title = tk.Label(\n            info_panel,\n            text=\"Instructions\",\n            font=(\"Arial\", 14, \"bold\"),\n            bg='lightgray',\n            fg='black'\n        )\n        info_title.pack(pady=(10, 5))\n\n        # Create scrollable text widget for information\n        text_frame = tk.Frame(info_panel, bg='lightgray')\n        text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))\n\n        info_text = tk.Text(\n            text_frame,\n            font=(\"Arial\", 10),\n            bg='white',\n            fg='black',\n            wrap=tk.WORD,\n            height=10\n        )\n\n        info_scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=info_text.yview)\n        info_text.configure(yscrollcommand=info_scrollbar.set)\n\n        info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)\n        info_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)\n\n        # Add dummy instruction text\n        instruction_text = \"\"\"\n        Study the word pairs carefully. You have 8 minutes to memorize the associations between the Icelandic and English words.\n\n        After the time expires, you will be tested on your remembrance of these word pairs.\n\n        Good luck with your memorization!\n        \"\"\"\n\n        info_text.insert(tk.END, instruction_text.strip())\n        info_text.config(state=tk.DISABLED)\n\n        # Add a Next button for testing purposes\n        next_button_frame = tk.Frame(info_panel, bg='lightgray')\n        next_button_frame.pack(fill=tk.X, padx=10, pady=10)\n\n        next_button = tk.Button(\n            next_button_frame,\n            text=\"Next (Testing)\",\n            font=(\"Arial\", 12),\n            bg='orange',\n            fg='white',\n            command=self.on_timer_finished,  # Use the same function as timer completion\n            width=15,\n            height=2\n        )\n        next_button.pack()\n\n        # Start the countdown timer\n        self.start_countdown_timer()\n\n    def display_word_grid(self, parent_frame):\n        \"\"\"Display word pairs in a 5x4 grid\"\"\"\n        # Ensure we have enough word pairs (pad with empty if needed)\n        word_pairs = []\n        for index, row in self.word_data.iterrows():\n            ice_word = row.get('ice', '')\n            eng_word = row.get('eng', '')\n            if ice_word and eng_word:\n                word_pairs.append((ice_word, eng_word))\n\n        # Pad to exactly 20 pairs if needed\n        while len(word_pairs) < 20:\n            word_pairs.append(('', ''))\n\n        # Create 4 rows x 5 columns grid\n        for row in range(4):\n            for col in range(5):\n                index = row * 5 + col\n                if index < len(word_pairs):\n                    ice_word, eng_word = word_pairs[index]\n\n                    # Create frame for word pair\n                    pair_frame = tk.Frame(\n                        parent_frame,\n                        bg='white',\n                        relief=tk.RAISED,\n                        bd=1,\n                        padx=5,\n                        pady=5\n                    )\n                    pair_frame.grid(row=row, column=col, padx=2, pady=2, sticky='nsew')\n\n                    # Icelandic word (top)\n                    ice_label = tk.Label(\n                        pair_frame,\n                        text=ice_word,\n                        font=(\"Arial\", 12, \"bold\"),\n                        bg='lightblue',\n                        fg='black',\n                        relief=tk.FLAT,\n                        padx=5,\n                        pady=3\n                    )\n                    ice_label.pack(fill=tk.X)\n\n                    # English word (bottom)\n                    eng_label = tk.Label(\n                        pair_frame,\n                        text=eng_word,\n                        font=(\"Arial\", 12),\n                        bg='lightgreen',\n                        fg='black',\n                        relief=tk.FLAT,\n                        padx=5,\n                        pady=3\n                    )\n                    eng_label.pack(fill=tk.X)\n\n        # Configure grid weights for equal distribution\n        for i in range(4):\n            parent_frame.grid_rowconfigure(i, weight=1)\n        for i in range(5):\n            parent_frame.grid_columnconfigure(i, weight=1)\n\n    def start_countdown_timer(self):\n        \"\"\"Start the 8-minute countdown timer\"\"\"\n        self.time_remaining = 8 * 60  # 8 minutes in seconds\n        self.update_timer()\n\n    def update_timer(self):\n        \"\"\"Update the countdown timer display\"\"\"\n        if hasattr(self, 'time_remaining') and self.time_remaining > 0:\n            minutes = self.time_remaining // 60\n            seconds = self.time_remaining % 60\n            time_text = f\"{minutes:02d}:{seconds:02d}\"\n\n            if hasattr(self, 'timer_display'):\n                self.timer_display.config(text=time_text)\n\n                # Change color when time is running low\n                if self.time_remaining <= 60:  # Last minute\n                    self.timer_display.config(fg='red')\n                elif self.time_remaining <= 180:  # Last 3 minutes\n                    self.timer_display.config(fg='orange')\n\n            self.time_remaining -= 1\n\n            # Schedule next update in 1 second\n            self.root.after(1000, self.update_timer)\n        else:\n            # Time's up!\n            if hasattr(self, 'timer_display'):\n                self.timer_display.config(text=\"00:00\", fg='red')\n            self.on_timer_finished()\n\n    def on_timer_finished(self):\n        \"\"\"Handle when the countdown timer reaches zero\"\"\"\n        print(\"Memorization time finished!\")\n        # Use the new TestScreen module\n        self.test_screen = TestScreen(\n            root=self.root,\n            word_data=self.word_data,\n            unique_id=self.unique_id,\n            completion_callback=self.on_test_completed\n        )\n\n    def on_test_completed(self, answers):\n        \"\"\"Handle test completion\"\"\"\n        print(f\"Test completed with {len(answers)} answers\")\n\n        # Show break screen instead of completion message\n        self.show_break_screen()\n\n    def show_break_screen(self):\n        \"\"\"Display the break screen with dummy text\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Create main frame with reduced padding\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=30)\n\n        # Title with less spacing\n        title_label = tk.Label(\n            main_frame,\n            text=\"Break Time\",\n            font=(\"Arial\", 28, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        title_label.pack(pady=(0, 20))\n\n        # Create text frame with reduced size\n        text_frame = tk.Frame(main_frame, bg='white')\n        text_frame.pack(fill=tk.BOTH, expand=True)\n\n        # Text widget with smaller font and padding\n        text_widget = tk.Text(\n            text_frame,\n            font=(\"Arial\", 12),\n            bg='white',\n            fg='black',\n            wrap=tk.WORD,\n            padx=15,\n            pady=15,\n            height=15  # Limit height\n        )\n\n        scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_widget.yview)\n        text_widget.configure(yscrollcommand=scrollbar.set)\n\n        # Pack text widget and scrollbar\n        text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)\n        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)\n\n        # Break screen dummy text - shortened\n        break_text = \"\"\"\n        Great job completing the first test!\n\n        You have now finished the first memory test. Take a moment to relax and rest your mind.\n\n        During this break, you can:\n        • Take a deep breath and relax\n        • Stretch if you need to\n        • Clear your mind from the previous task\n\n        The next part of the experiment will begin when you click the \"Next\" button below.\n\n        When you're ready to continue with the next phase of the experiment, please click the \"Next\" button.\n\n        Thank you for your continued participation in this cognitive science research!\n        \"\"\"\n\n        # Insert break text\n        text_widget.insert(tk.END, break_text.strip())\n        text_widget.config(state=tk.DISABLED)  # Make text read-only\n\n        # Next button in bottom right corner with less padding\n        button_frame = tk.Frame(main_frame, bg='white')\n        button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(15, 0))\n\n        next_button = tk.Button(\n            button_frame,\n            text=\"Next\",\n            font=(\"Arial\", 14),\n            bg='lightgreen',\n            command=self.on_break_next_clicked,\n            width=10,\n            height=2\n        )\n        next_button.pack(side=tk.RIGHT)\n\n    def on_break_next_clicked(self):\n        \"\"\"Handle next button click from break screen\"\"\"\n        print(\"Break completed, moving to second test\")\n        # Move to second test screen instead of completion\n        self.show_second_test_screen()\n\n    def show_second_test_screen(self):\n        \"\"\"Display the second test screen with randomized questions\"\"\"\n        print(\"Starting second test with randomized questions!\")\n        # Create second test screen with randomized question order\n        self.second_test_screen = SecondTestScreen(\n            root=self.root,\n            word_data=self.word_data,\n            unique_id=self.unique_id,\n            completion_callback=self.on_second_test_completed\n        )\n\n    def on_second_test_completed(self, answers):\n        \"\"\"Handle second test completion\"\"\"\n        print(f\"Second test completed with {len(answers)} answers\")\n        # Calculate scores and show final completion screen with results\n        self.calculate_and_show_results()\n\n    def calculate_and_show_results(self):\n        \"\"\"Calculate test scores and show results on final screen\"\"\"\n        try:\n            # Find the most recent CSV file for this session\n            data_dir = \"data\"\n            csv_files = [f for f in os.listdir(data_dir) if f.startswith(f\"experiment_{self.unique_id}\") and f.endswith('.csv')]\n\n            if csv_files:\n                csv_files.sort()\n                latest_csv = os.path.join(data_dir, csv_files[-1])\n                df = pd.read_csv(latest_csv)\n\n                # Calculate scores for both tests\n                first_test_correct = 0\n                second_test_correct = 0\n                total_questions = len(df)\n\n                for index, row in df.iterrows():\n                    correct_answer = str(row['eng']).lower().strip()\n\n                    # Check first test answer (answ_1)\n                    first_answer = str(row['answ_1']).lower().strip() if pd.notna(row['answ_1']) else ''\n                    if first_answer == correct_answer:\n                        first_test_correct += 1\n\n                    # Check second test answer (answ_2)\n                    second_answer = str(row['answ_2']).lower().strip() if pd.notna(row['answ_2']) else ''\n                    if second_answer == correct_answer:\n                        second_test_correct += 1\n\n                # Calculate percentages\n                first_test_percentage = (first_test_correct / total_questions) * 100 if total_questions > 0 else 0\n                second_test_percentage = (second_test_correct / total_questions) * 100 if total_questions > 0 else 0\n\n                print(f\"First test: {first_test_correct}/{total_questions} ({first_test_percentage:.1f}%)\")\n                print(f\"Second test: {second_test_correct}/{total_questions} ({second_test_percentage:.1f}%)\")\n\n                # Show results screen\n                self.show_results_screen(first_test_correct, second_test_correct, total_questions,\n                                       first_test_percentage, second_test_percentage)\n            else:\n                print(\"No CSV file found for scoring\")\n                self.show_final_completion_screen()\n\n        except Exception as e:\n            print(f\"Error calculating results: {e}\")\n            self.show_final_completion_screen()\n\n    def show_results_screen(self, first_correct, second_correct, total_questions, first_percentage, second_percentage):\n        \"\"\"Show the results screen\"\"\"\n        # Clear the root window\n        for widget in self.root.winfo_children():\n            widget.destroy()\n\n        # Create main frame\n        main_frame = tk.Frame(self.root, bg='white')\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)\n\n        # Title\n        title_label = tk.Label(\n            main_frame,\n            text=\"Experiment Results\",\n            font=(\"Arial\", 32, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        title_label.pack(pady=(0, 40))\n\n        # Results container\n        results_frame = tk.Frame(main_frame, bg='white')\n        results_frame.pack(expand=True)\n\n        # First test results\n        first_test_frame = tk.Frame(results_frame, bg='lightblue', relief=tk.RAISED, bd=3, padx=20, pady=20)\n        first_test_frame.pack(fill=tk.X, pady=(0, 20))\n\n        first_test_title = tk.Label(\n            first_test_frame,\n            text=\"First Test Results\",\n            font=(\"Arial\", 20, \"bold\"),\n            bg='lightblue',\n            fg='black'\n        )\n        first_test_title.pack()\n\n        first_test_score = tk.Label(\n            first_test_frame,\n            text=f\"Correct Answers: {first_correct} out of {total_questions}\",\n            font=(\"Arial\", 16),\n            bg='lightblue',\n            fg='black'\n        )\n        first_test_score.pack(pady=5)\n\n        first_test_percentage_label = tk.Label(\n            first_test_frame,\n            text=f\"Score: {first_percentage:.1f}%\",\n            font=(\"Arial\", 18, \"bold\"),\n            bg='lightblue',\n            fg='darkgreen' if first_percentage >= 70 else 'darkorange' if first_percentage >= 50 else 'darkred'\n        )\n        first_test_percentage_label.pack(pady=5)\n\n        # Second test results\n        second_test_frame = tk.Frame(results_frame, bg='lightgreen', relief=tk.RAISED, bd=3, padx=20, pady=20)\n        second_test_frame.pack(fill=tk.X, pady=(0, 20))\n\n        second_test_title = tk.Label(\n            second_test_frame,\n            text=\"Second Test Results (Randomized)\",\n            font=(\"Arial\", 20, \"bold\"),\n            bg='lightgreen',\n            fg='black'\n        )\n        second_test_title.pack()\n\n        second_test_score = tk.Label(\n            second_test_frame,\n            text=f\"Correct Answers: {second_correct} out of {total_questions}\",\n            font=(\"Arial\", 16),\n            bg='lightgreen',\n            fg='black'\n        )\n        second_test_score.pack(pady=5)\n\n        second_test_percentage_label = tk.Label(\n            second_test_frame,\n            text=f\"Score: {second_percentage:.1f}%\",\n            font=(\"Arial\", 18, \"bold\"),\n            bg='lightgreen',\n            fg='darkgreen' if second_percentage >= 70 else 'darkorange' if second_percentage >= 50 else 'darkred'\n        )\n        second_test_percentage_label.pack(pady=5)\n\n        # Overall comparison\n        comparison_frame = tk.Frame(results_frame, bg='lightyellow', relief=tk.RAISED, bd=3, padx=20, pady=20)\n        comparison_frame.pack(fill=tk.X)\n\n        comparison_title = tk.Label(\n            comparison_frame,\n            text=\"Performance Comparison\",\n            font=(\"Arial\", 18, \"bold\"),\n            bg='lightyellow',\n            fg='black'\n        )\n        comparison_title.pack()\n\n        # Calculate difference\n        difference = second_percentage - first_percentage\n        if difference > 0:\n            comparison_text = f\"Improvement: +{difference:.1f}% better in second test\"\n            comparison_color = 'darkgreen'\n        elif difference < 0:\n            comparison_text = f\"Decline: {difference:.1f}% lower in second test\"\n            comparison_color = 'darkred'\n        else:\n            comparison_text = \"Same performance in both tests\"\n            comparison_color = 'black'\n\n        comparison_label = tk.Label(\n            comparison_frame,\n            text=comparison_text,\n            font=(\"Arial\", 14, \"bold\"),\n            bg='lightyellow',\n            fg=comparison_color\n        )\n        comparison_label.pack(pady=5)\n\n        # Thank you message\n        thank_you_label = tk.Label(\n            main_frame,\n            text=\"Thank you for your participation!\",\n            font=(\"Arial\", 18, \"bold\"),\n            bg='white',\n            fg='black'\n        )\n        thank_you_label.pack(pady=(30, 0))\n\ndef main():\n    root = tk.Tk()\n    app = ExperimentApp(root)\n    root.mainloop()\n\nif __name__ == \"__main__\":\n    main()\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main.py b/src/main.py
+--- a/src/main.py	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ b/src/main.py	(date 1759941696341)
+@@ -18,6 +18,10 @@
+         # Generate unique ID for this session
+         self.unique_id = str(uuid.uuid4())[:8]  # Short unique ID
+ 
++        # Timer control variables
++        self.timer_running = False
++        self.timer_job = None
++
+         # Load word data
+         self.word_data = self.load_word_data()
+ 
+@@ -97,12 +101,10 @@
+ 
+         except Exception as e:
+             print(f"Error loading word data: {e}")
+-            # Create dummy data if file doesn't exist or can't be read
+-            return pd.DataFrame({
+-                'word_id': [1, 2, 3, 4, 5],
+-                'ice': ['hestur', 'hundur', 'köttur', 'fugl', 'fiskur'],
+-                'eng': ['horse', 'dog', 'cat', 'bird', 'fish']
+-            })
++            print("No word data file found. Please ensure 'word_pairs/dummy_words.xlsx' exists.")
++            # Exit the application instead of using dummy data
++            import sys
++            sys.exit(1)
+ 
+     def show_welcome_screen(self):
+         """Display the welcome screen"""
+@@ -456,38 +458,60 @@
+ 
+     def start_countdown_timer(self):
+         """Start the 8-minute countdown timer"""
+-        self.time_remaining = 8 * 60  # 8 minutes in seconds
++        self.time_remaining = 4 * 60  # 8 minutes in seconds
++        self.timer_running = True
+         self.update_timer()
+ 
++    def stop_timer(self):
++        """Stop the countdown timer"""
++        self.timer_running = False
++        if self.timer_job:
++            self.root.after_cancel(self.timer_job)
++            self.timer_job = None
++
+     def update_timer(self):
+         """Update the countdown timer display"""
++        if not self.timer_running:
++            return
++
+         if hasattr(self, 'time_remaining') and self.time_remaining > 0:
+             minutes = self.time_remaining // 60
+             seconds = self.time_remaining % 60
+             time_text = f"{minutes:02d}:{seconds:02d}"
+ 
+-            if hasattr(self, 'timer_display'):
+-                self.timer_display.config(text=time_text)
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display.winfo_exists():
++                    self.timer_display.config(text=time_text)
+ 
+-                # Change color when time is running low
+-                if self.time_remaining <= 60:  # Last minute
+-                    self.timer_display.config(fg='red')
+-                elif self.time_remaining <= 180:  # Last 3 minutes
+-                    self.timer_display.config(fg='orange')
++                    # Change color when time is running low
++                    if self.time_remaining <= 60:  # Last minute
++                        self.timer_display.config(fg='red')
++                    elif self.time_remaining <= 180:  # Last 3 minutes
++                        self.timer_display.config(fg='orange')
++            except tk.TclError:
++                # Widget has been destroyed, stop the timer
++                self.stop_timer()
++                return
+ 
+             self.time_remaining -= 1
+ 
+             # Schedule next update in 1 second
+-            self.root.after(1000, self.update_timer)
++            if self.timer_running:
++                self.timer_job = self.root.after(1000, self.update_timer)
+         else:
+             # Time's up!
+-            if hasattr(self, 'timer_display'):
+-                self.timer_display.config(text="00:00", fg='red')
++            try:
++                if hasattr(self, 'timer_display') and self.timer_display.winfo_exists():
++                    self.timer_display.config(text="00:00", fg='red')
++            except tk.TclError:
++                pass  # Widget destroyed, ignore
+             self.on_timer_finished()
+ 
+     def on_timer_finished(self):
+         """Handle when the countdown timer reaches zero"""
+         print("Memorization time finished!")
++        # Stop the timer first
++        self.stop_timer()
+         # Use the new TestScreen module
+         self.test_screen = TestScreen(
+             root=self.root,
+Index: src/data/experiment_617acd9b_20251004_160312.csv
+===================================================================
+diff --git a/src/data/experiment_617acd9b_20251004_160312.csv b/src/data/experiment_617acd9b_20251004_160312.csv
+deleted file mode 100644
+--- a/src/data/experiment_617acd9b_20251004_160312.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-617acd9b,1,Gluggi,Window,,
+-617acd9b,2,Stóll,Chair,,
+-617acd9b,3,Borð,Table,,
+-617acd9b,4,Fatnaður,Clothing,,
+-617acd9b,5,Skór,Shoes,,
+-617acd9b,6,Sokkar,Socks,,
+-617acd9b,7,Jakki,Jacket,,
+-617acd9b,8,Hattur,Hat,,
+-617acd9b,9,Mynd,Picture,,
+-617acd9b,10,Ljós,Light,,
+-617acd9b,11,Hár,Hair,,
+-617acd9b,12,Auga,Eye,,
+-617acd9b,13,Tennur,Teeth,,
+-617acd9b,14,Hjörtu,Hearts,,
+-617acd9b,15,Hönd,Hand,,
+-617acd9b,16,Fótur,Foot,,
+-617acd9b,17,Borg,City,,
+-617acd9b,18,Kirkja,Church,,
+-617acd9b,19,Bréf,Letter,,
+-617acd9b,20,Lykill,Key,,
+Index: src/data/experiment_d9af1be8_20251004_161145.csv
+===================================================================
+diff --git a/src/data/experiment_d9af1be8_20251004_161145.csv b/src/data/experiment_d9af1be8_20251004_161145.csv
+deleted file mode 100644
+--- a/src/data/experiment_d9af1be8_20251004_161145.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-d9af1be8,1,Gluggi,Window,,
+-d9af1be8,2,Stóll,Chair,,
+-d9af1be8,3,Borð,Table,,
+-d9af1be8,4,Fatnaður,Clothing,,
+-d9af1be8,5,Skór,Shoes,,
+-d9af1be8,6,Sokkar,Socks,,
+-d9af1be8,7,Jakki,Jacket,,
+-d9af1be8,8,Hattur,Hat,,
+-d9af1be8,9,Mynd,Picture,,
+-d9af1be8,10,Ljós,Light,,
+-d9af1be8,11,Hár,Hair,,
+-d9af1be8,12,Auga,Eye,,
+-d9af1be8,13,Tennur,Teeth,,
+-d9af1be8,14,Hjörtu,Hearts,,
+-d9af1be8,15,Hönd,Hand,,
+-d9af1be8,16,Fótur,Foot,,
+-d9af1be8,17,Borg,City,,
+-d9af1be8,18,Kirkja,Church,,
+-d9af1be8,19,Bréf,Letter,,
+-d9af1be8,20,Lykill,Key,,
+Index: src/data/experiment_409d1e22_20251004_143451.csv
+===================================================================
+diff --git a/src/data/experiment_409d1e22_20251004_143451.csv b/src/data/experiment_409d1e22_20251004_143451.csv
+deleted file mode 100644
+--- a/src/data/experiment_409d1e22_20251004_143451.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-409d1e22,1,Gluggi,Window,,
+-409d1e22,2,Stóll,Chair,,
+-409d1e22,3,Borð,Table,,
+-409d1e22,4,Fatnaður,Clothing,,
+-409d1e22,5,Skór,Shoes,,
+-409d1e22,6,Sokkar,Socks,,
+-409d1e22,7,Jakki,Jacket,,
+-409d1e22,8,Hattur,Hat,,
+-409d1e22,9,Mynd,Picture,,
+-409d1e22,10,Ljós,Light,,
+-409d1e22,11,Hár,Hair,,
+-409d1e22,12,Auga,Eye,,
+-409d1e22,13,Tennur,Teeth,,
+-409d1e22,14,Hjörtu,Hearts,,
+-409d1e22,15,Hönd,Hand,,
+-409d1e22,16,Fótur,Foot,,
+-409d1e22,17,Borg,City,,
+-409d1e22,18,Kirkja,Church,,
+-409d1e22,19,Bréf,Letter,,
+-409d1e22,20,Lykill,Key,,
+Index: src/data/experiment_3438e521_20251004_161039.csv
+===================================================================
+diff --git a/src/data/experiment_3438e521_20251004_161039.csv b/src/data/experiment_3438e521_20251004_161039.csv
+deleted file mode 100644
+--- a/src/data/experiment_3438e521_20251004_161039.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-3438e521,1,Gluggi,Window,,
+-3438e521,2,Stóll,Chair,,
+-3438e521,3,Borð,Table,,
+-3438e521,4,Fatnaður,Clothing,,
+-3438e521,5,Skór,Shoes,,
+-3438e521,6,Sokkar,Socks,,
+-3438e521,7,Jakki,Jacket,,
+-3438e521,8,Hattur,Hat,,
+-3438e521,9,Mynd,Picture,,
+-3438e521,10,Ljós,Light,,
+-3438e521,11,Hár,Hair,,
+-3438e521,12,Auga,Eye,,
+-3438e521,13,Tennur,Teeth,,
+-3438e521,14,Hjörtu,Hearts,,
+-3438e521,15,Hönd,Hand,,
+-3438e521,16,Fótur,Foot,,
+-3438e521,17,Borg,City,,
+-3438e521,18,Kirkja,Church,,
+-3438e521,19,Bréf,Letter,,
+-3438e521,20,Lykill,Key,,
+Index: src/data/experiment_28776f7e_20251004_160423.csv
+===================================================================
+diff --git a/src/data/experiment_28776f7e_20251004_160423.csv b/src/data/experiment_28776f7e_20251004_160423.csv
+deleted file mode 100644
+--- a/src/data/experiment_28776f7e_20251004_160423.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-28776f7e,1,Gluggi,Window,,
+-28776f7e,2,Stóll,Chair,,
+-28776f7e,3,Borð,Table,,
+-28776f7e,4,Fatnaður,Clothing,,
+-28776f7e,5,Skór,Shoes,,
+-28776f7e,6,Sokkar,Socks,,
+-28776f7e,7,Jakki,Jacket,,
+-28776f7e,8,Hattur,Hat,,
+-28776f7e,9,Mynd,Picture,,
+-28776f7e,10,Ljós,Light,,
+-28776f7e,11,Hár,Hair,,
+-28776f7e,12,Auga,Eye,,
+-28776f7e,13,Tennur,Teeth,,
+-28776f7e,14,Hjörtu,Hearts,,
+-28776f7e,15,Hönd,Hand,,
+-28776f7e,16,Fótur,Foot,,
+-28776f7e,17,Borg,City,,
+-28776f7e,18,Kirkja,Church,,
+-28776f7e,19,Bréf,Letter,,
+-28776f7e,20,Lykill,Key,,
+Index: src/data/experiment_1c75401d_20251004_144435.csv
+===================================================================
+diff --git a/src/data/experiment_1c75401d_20251004_144435.csv b/src/data/experiment_1c75401d_20251004_144435.csv
+deleted file mode 100644
+--- a/src/data/experiment_1c75401d_20251004_144435.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-1c75401d,1,Gluggi,Window,1,15
+-1c75401d,2,Stóll,Chair,2,8
+-1c75401d,3,Borð,Table,3,7
+-1c75401d,4,Fatnaður,Clothing,4,20
+-1c75401d,5,Skór,Shoes,5,2
+-1c75401d,6,Sokkar,Socks,6,12
+-1c75401d,7,Jakki,Jacket,7,6
+-1c75401d,8,Hattur,Hat,8,16
+-1c75401d,9,Mynd,Picture,9,1
+-1c75401d,10,Ljós,Light,10,10
+-1c75401d,11,Hár,Hair,11,19
+-1c75401d,12,Auga,Eye,12,11
+-1c75401d,13,Tennur,Teeth,13,4
+-1c75401d,14,Hjörtu,Hearts,14,9
+-1c75401d,15,Hönd,Hand,15,18
+-1c75401d,16,Fótur,Foot,16,3
+-1c75401d,17,Borg,City,17,5
+-1c75401d,18,Kirkja,Church,18,13
+-1c75401d,19,Bréf,Letter,19,14
+-1c75401d,20,Lykill,Key,20,17
+Index: src/data/experiment_b84ebc7d_20251004_145823.csv
+===================================================================
+diff --git a/src/data/experiment_b84ebc7d_20251004_145823.csv b/src/data/experiment_b84ebc7d_20251004_145823.csv
+deleted file mode 100644
+--- a/src/data/experiment_b84ebc7d_20251004_145823.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-b84ebc7d,1,Gluggi,Window,window,window
+-b84ebc7d,2,Stóll,Chair,chair,chair
+-b84ebc7d,3,Borð,Table,table,table
+-b84ebc7d,4,Fatnaður,Clothing,clothing,clothes
+-b84ebc7d,5,Skór,Shoes,shoes,shoes
+-b84ebc7d,6,Sokkar,Socks,socks,socks
+-b84ebc7d,7,Jakki,Jacket,jacket,jacket
+-b84ebc7d,8,Hattur,Hat,hat,hat
+-b84ebc7d,9,Mynd,Picture,picture,picture
+-b84ebc7d,10,Ljós,Light,light,light
+-b84ebc7d,11,Hár,Hair,hair,hair
+-b84ebc7d,12,Auga,Eye,eyes,eyes
+-b84ebc7d,13,Tennur,Teeth,teeth,teeth
+-b84ebc7d,14,Hjörtu,Hearts,hearts,hearts
+-b84ebc7d,15,Hönd,Hand,hand,hand
+-b84ebc7d,16,Fótur,Foot,foot,foot
+-b84ebc7d,17,Borg,City,city,city
+-b84ebc7d,18,Kirkja,Church,church,church
+-b84ebc7d,19,Bréf,Letter,letter,letter
+-b84ebc7d,20,Lykill,Key,key,key
+Index: src/data/experiment_f71fdb97_20251004_144854.csv
+===================================================================
+diff --git a/src/data/experiment_f71fdb97_20251004_144854.csv b/src/data/experiment_f71fdb97_20251004_144854.csv
+deleted file mode 100644
+--- a/src/data/experiment_f71fdb97_20251004_144854.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-f71fdb97,1,Gluggi,Window,gluggi,gluggi
+-f71fdb97,2,Stóll,Chair,stoll,stoll
+-f71fdb97,3,Borð,Table,boro,boro
+-f71fdb97,4,Fatnaður,Clothing,fatna,fatna
+-f71fdb97,5,Skór,Shoes,skor,skor
+-f71fdb97,6,Sokkar,Socks,sokkar,sokkar
+-f71fdb97,7,Jakki,Jacket,jakki,jakki
+-f71fdb97,8,Hattur,Hat,hattur,hattur
+-f71fdb97,9,Mynd,Picture,mynd,mynd
+-f71fdb97,10,Ljós,Light,ljos,ljos
+-f71fdb97,11,Hár,Hair,har,har
+-f71fdb97,12,Auga,Eye,auga,auga
+-f71fdb97,13,Tennur,Teeth,tennur,tennur
+-f71fdb97,14,Hjörtu,Hearts,hjortu,hjortu
+-f71fdb97,15,Hönd,Hand,hond,hond
+-f71fdb97,16,Fótur,Foot,fotur,fotur
+-f71fdb97,17,Borg,City,borg,borg
+-f71fdb97,18,Kirkja,Church,kirkja,kirkja
+-f71fdb97,19,Bréf,Letter,bref,bref
+-f71fdb97,20,Lykill,Key,lykill,lykill
+Index: src/data/experiment_b1de15dc_20251004_160152.csv
+===================================================================
+diff --git a/src/data/experiment_b1de15dc_20251004_160152.csv b/src/data/experiment_b1de15dc_20251004_160152.csv
+deleted file mode 100644
+--- a/src/data/experiment_b1de15dc_20251004_160152.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-b1de15dc,1,Gluggi,Window,,
+-b1de15dc,2,Stóll,Chair,,
+-b1de15dc,3,Borð,Table,,
+-b1de15dc,4,Fatnaður,Clothing,,
+-b1de15dc,5,Skór,Shoes,,
+-b1de15dc,6,Sokkar,Socks,,
+-b1de15dc,7,Jakki,Jacket,,
+-b1de15dc,8,Hattur,Hat,,
+-b1de15dc,9,Mynd,Picture,,
+-b1de15dc,10,Ljós,Light,,
+-b1de15dc,11,Hár,Hair,,
+-b1de15dc,12,Auga,Eye,,
+-b1de15dc,13,Tennur,Teeth,,
+-b1de15dc,14,Hjörtu,Hearts,,
+-b1de15dc,15,Hönd,Hand,,
+-b1de15dc,16,Fótur,Foot,,
+-b1de15dc,17,Borg,City,,
+-b1de15dc,18,Kirkja,Church,,
+-b1de15dc,19,Bréf,Letter,,
+-b1de15dc,20,Lykill,Key,,
+Index: src/data/experiment_d6a86499_20251004_161605.csv
+===================================================================
+diff --git a/src/data/experiment_d6a86499_20251004_161605.csv b/src/data/experiment_d6a86499_20251004_161605.csv
+deleted file mode 100644
+--- a/src/data/experiment_d6a86499_20251004_161605.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-d6a86499,1,Gluggi,Window,,
+-d6a86499,2,Stóll,Chair,,
+-d6a86499,3,Borð,Table,,
+-d6a86499,4,Fatnaður,Clothing,,
+-d6a86499,5,Skór,Shoes,,
+-d6a86499,6,Sokkar,Socks,,
+-d6a86499,7,Jakki,Jacket,,
+-d6a86499,8,Hattur,Hat,,
+-d6a86499,9,Mynd,Picture,,
+-d6a86499,10,Ljós,Light,,
+-d6a86499,11,Hár,Hair,,
+-d6a86499,12,Auga,Eye,,
+-d6a86499,13,Tennur,Teeth,,
+-d6a86499,14,Hjörtu,Hearts,,
+-d6a86499,15,Hönd,Hand,,
+-d6a86499,16,Fótur,Foot,,
+-d6a86499,17,Borg,City,,
+-d6a86499,18,Kirkja,Church,,
+-d6a86499,19,Bréf,Letter,,
+-d6a86499,20,Lykill,Key,,
+Index: src/data/experiment_aee9e25f_20251004_145401.csv
+===================================================================
+diff --git a/src/data/experiment_aee9e25f_20251004_145401.csv b/src/data/experiment_aee9e25f_20251004_145401.csv
+deleted file mode 100644
+--- a/src/data/experiment_aee9e25f_20251004_145401.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-aee9e25f,1,Gluggi,Window,,
+-aee9e25f,2,Stóll,Chair,,
+-aee9e25f,3,Borð,Table,,
+-aee9e25f,4,Fatnaður,Clothing,,
+-aee9e25f,5,Skór,Shoes,,
+-aee9e25f,6,Sokkar,Socks,,
+-aee9e25f,7,Jakki,Jacket,,
+-aee9e25f,8,Hattur,Hat,,
+-aee9e25f,9,Mynd,Picture,,
+-aee9e25f,10,Ljós,Light,,
+-aee9e25f,11,Hár,Hair,,
+-aee9e25f,12,Auga,Eye,,
+-aee9e25f,13,Tennur,Teeth,,
+-aee9e25f,14,Hjörtu,Hearts,,
+-aee9e25f,15,Hönd,Hand,,
+-aee9e25f,16,Fótur,Foot,,
+-aee9e25f,17,Borg,City,,
+-aee9e25f,18,Kirkja,Church,,
+-aee9e25f,19,Bréf,Letter,,
+-aee9e25f,20,Lykill,Key,,
+Index: src/data/experiment_dd8c0d16_20251004_143414.csv
+===================================================================
+diff --git a/src/data/experiment_dd8c0d16_20251004_143414.csv b/src/data/experiment_dd8c0d16_20251004_143414.csv
+deleted file mode 100644
+--- a/src/data/experiment_dd8c0d16_20251004_143414.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-dd8c0d16,1,Gluggi,Window,,
+-dd8c0d16,2,Stóll,Chair,,
+-dd8c0d16,3,Borð,Table,,
+-dd8c0d16,4,Fatnaður,Clothing,,
+-dd8c0d16,5,Skór,Shoes,,
+-dd8c0d16,6,Sokkar,Socks,,
+-dd8c0d16,7,Jakki,Jacket,,
+-dd8c0d16,8,Hattur,Hat,,
+-dd8c0d16,9,Mynd,Picture,,
+-dd8c0d16,10,Ljós,Light,,
+-dd8c0d16,11,Hár,Hair,,
+-dd8c0d16,12,Auga,Eye,,
+-dd8c0d16,13,Tennur,Teeth,,
+-dd8c0d16,14,Hjörtu,Hearts,,
+-dd8c0d16,15,Hönd,Hand,,
+-dd8c0d16,16,Fótur,Foot,,
+-dd8c0d16,17,Borg,City,,
+-dd8c0d16,18,Kirkja,Church,,
+-dd8c0d16,19,Bréf,Letter,,
+-dd8c0d16,20,Lykill,Key,,
+Index: src/data/experiment_f8abbd24_20251004_160508.csv
+===================================================================
+diff --git a/src/data/experiment_f8abbd24_20251004_160508.csv b/src/data/experiment_f8abbd24_20251004_160508.csv
+deleted file mode 100644
+--- a/src/data/experiment_f8abbd24_20251004_160508.csv	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ /dev/null	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
+@@ -1,21 +0,0 @@
+-id,word_id,ice,eng,answ_1,answ_2
+-f8abbd24,1,Gluggi,Window,,
+-f8abbd24,2,Stóll,Chair,,
+-f8abbd24,3,Borð,Table,,
+-f8abbd24,4,Fatnaður,Clothing,,
+-f8abbd24,5,Skór,Shoes,,
+-f8abbd24,6,Sokkar,Socks,,
+-f8abbd24,7,Jakki,Jacket,,
+-f8abbd24,8,Hattur,Hat,,
+-f8abbd24,9,Mynd,Picture,,
+-f8abbd24,10,Ljós,Light,,
+-f8abbd24,11,Hár,Hair,,
+-f8abbd24,12,Auga,Eye,,
+-f8abbd24,13,Tennur,Teeth,,
+-f8abbd24,14,Hjörtu,Hearts,,
+-f8abbd24,15,Hönd,Hand,,
+-f8abbd24,16,Fótur,Foot,,
+-f8abbd24,17,Borg,City,,
+-f8abbd24,18,Kirkja,Church,,
+-f8abbd24,19,Bréf,Letter,,
+-f8abbd24,20,Lykill,Key,,
+Index: requirements.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/requirements.txt b/requirements.txt
+--- a/requirements.txt	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ b/requirements.txt	(date 1759941287669)
+@@ -1,0 +1,8 @@
++et_xmlfile==2.0.0
++numpy==2.3.3
++openpyxl==3.1.5
++pandas==2.3.3
++python-dateutil==2.9.0.post0
++pytz==2025.2
++six==1.17.0
++tzdata==2025.2
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 3.9 (pythonProject)\" project-jdk-type=\"Python SDK\" />\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 4fa99818ee6dcff4255bd3a0a28296be7c597802)
++++ b/.idea/misc.xml	(date 1759593248875)
+@@ -1,4 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (pythonProject)" project-jdk-type="Python SDK" />
++  <component name="Black">
++    <option name="sdkName" value="Python 3.13" />
++  </component>
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file
