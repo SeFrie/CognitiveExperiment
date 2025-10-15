@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="Better design on the word lists&#10;new result screen">
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="Memorizing time has changes to 4 minutes at each session.">
       <change beforePath="$PROJECT_DIR$/data/experiment_86f5d016_20251015_142332.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/test_screen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +90,7 @@
       <workItem from="1759593771056" duration="260000" />
       <workItem from="1759925201867" duration="3369000" />
       <workItem from="1759943814757" duration="1560000" />
-      <workItem from="1760516774590" duration="14491000" />
+      <workItem from="1760516774590" duration="15257000" />
     </task>
     <task id="LOCAL-00001" summary="minor excel adjustments">
       <option name="closed" value="true" />
@@ -134,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760534840735</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Memorizing time has changes to 4 minutes at each session.">
+      <option name="closed" value="true" />
+      <created>1760535345692</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1760535345692</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -156,11 +162,12 @@
     <MESSAGE value="scrips moved to src folder" />
     <MESSAGE value="Memorizing screen pre 2nd test created&#10;Storing to .csv corrected" />
     <MESSAGE value="Better design on the word lists&#10;new result screen" />
-    <option name="LAST_COMMIT_MESSAGE" value="Better design on the word lists&#10;new result screen" />
+    <MESSAGE value="Memorizing time has changes to 4 minutes at each session." />
+    <option name="LAST_COMMIT_MESSAGE" value="Memorizing time has changes to 4 minutes at each session." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CognitiveExperiment$test_screen.coverage" NAME="test_screen Coverage Results" MODIFIED="1760531005966" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/CognitiveExperiment$main.coverage" NAME="main Coverage Results" MODIFIED="1760535089211" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$main.coverage" NAME="main Coverage Results" MODIFIED="1760535900146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/CognitiveExperiment$second_test_screen.coverage" NAME="second_test_screen Coverage Results" MODIFIED="1760523989980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>

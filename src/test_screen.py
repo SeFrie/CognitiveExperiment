@@ -1,6 +1,7 @@
 import tkinter as tk
 import pandas as pd
 import os
+import random
 
 
 class TestScreen:
@@ -19,9 +20,13 @@ class TestScreen:
         self.unique_id = unique_id
         self.completion_callback = completion_callback
 
+        # Create randomized question order
+        self.question_indices = list(range(len(self.word_data)))
+        random.shuffle(self.question_indices)  # Randomize the order
+
         # Initialize test variables
         self.current_question = 0
-        self.answers = {}  # Store answers by question index
+        self.answers = {}  # Store answers by word_id (not question index)
         self.total_questions = min(25, len(self.word_data))  # Changed from 20 to 25
 
         # Timer variables
@@ -35,6 +40,8 @@ class TestScreen:
         self.answer_entry = None
         self.prev_button = None
         self.next_button = None
+
+        print(f"First test created with randomized order: {self.question_indices[:5]}...")
 
         self.setup_ui()
 
@@ -211,36 +218,59 @@ class TestScreen:
         )
         completion_label.pack(expand=True)
 
+    def get_current_word_id(self):
+        """Get the word_id for the current randomized question"""
+        if self.current_question < len(self.question_indices):
+            randomized_index = self.question_indices[self.current_question]
+            if randomized_index < len(self.word_data):
+                row = self.word_data.iloc[randomized_index]
+                return row.get('word_id', randomized_index + 1)
+        return None
+
     def display_current_question(self):
-        """Display the current question"""
-        if self.current_question < len(self.word_data):
-            row = self.word_data.iloc[self.current_question]
-            icelandic_word = row.get('ice', '')
-            self.question_label.config(text=icelandic_word)
+        """Display the current question (in randomized order)"""
+        if self.current_question < len(self.question_indices):
+            # Get the randomized question index
+            randomized_index = self.question_indices[self.current_question]
 
-            # Show existing answer
-            existing_answer = self.answers.get(self.current_question, '')
-            self.answer_entry.delete(0, tk.END)
-            self.answer_entry.insert(0, existing_answer)
+            if randomized_index < len(self.word_data):
+                row = self.word_data.iloc[randomized_index]
+                icelandic_word = row.get('ice', '')
+                word_id = row.get('word_id', randomized_index + 1)
 
-            # Update card colors
-            self.update_all_cards()
+                self.question_label.config(text=icelandic_word)
 
-            # Update button states
-            self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')
-            self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')
+                # Show existing answer if any (stored by word_id)
+                existing_answer = self.answers.get(word_id, '')
+                self.answer_entry.delete(0, tk.END)
+                self.answer_entry.insert(0, existing_answer)
+
+                # Update card colors
+                self.update_all_cards()
+
+                # Update button states
+                self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')
+                self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')
 
     def update_all_cards(self):
         """Update all question card colors based on answer status"""
         for i in range(len(self.question_cards)):
             card = self.question_cards[i]
             border_frame = self.card_frames[i]
-            if i in self.answers and self.answers[i].strip():
-                # Answered - green border
-                border_frame.config(bg='green')
-            else:
-                # Unanswered - red border
-                border_frame.config(bg='red')
+
+            # Get the word_id for this card position
+            if i < len(self.question_indices):
+                randomized_index = self.question_indices[i]
+                if randomized_index < len(self.word_data):
+                    row = self.word_data.iloc[randomized_index]
+                    word_id = row.get('word_id', randomized_index + 1)
+
+                    if word_id in self.answers and self.answers[word_id].strip():
+                        # Answered - green border
+                        border_frame.config(bg='green')
+                    else:
+                        # Unanswered - red border
+                        border_frame.config(bg='red')
 
             # Current question highlight
             if i == self.current_question:
@@ -249,10 +279,12 @@ class TestScreen:
                 card.config(bg='white')
 
     def on_answer_changed(self, event=None):
-        """Handle answer change - save on every keystroke"""
+        """Handle answer change - save on every keystroke using word_id"""
         answer = self.answer_entry.get().strip()
-        self.answers[self.current_question] = answer
-        self.update_all_cards()
+        word_id = self.get_current_word_id()
+        if word_id is not None:
+            self.answers[word_id] = answer
+            self.update_all_cards()
 
     def previous_question(self):
         """Go to previous question"""
@@ -294,19 +326,18 @@ class TestScreen:
                 print(f"Saving {len(self.answers)} answers to CSV...")
 
                 # Update the answ_1 column with answers using word_id matching
-                for question_index, answer in self.answers.items():
-                    if question_index < len(self.word_data):
-                        # Get the word_id from the word_data for this question
-                        word_id = int(self.word_data.iloc[question_index]['word_id'])
+                for word_id, answer in self.answers.items():
+                    # Ensure word_id is int for matching
+                    word_id = int(word_id)
 
-                        # Find the row with matching word_id in the CSV
-                        matching_rows = df[df['word_id'] == word_id]
-                        if not matching_rows.empty:
-                            row_index = matching_rows.index[0]
-                            df.loc[row_index, 'answ_1'] = answer
-                            print(f"  Saved answer for word_id {word_id}: '{answer}'")
-                        else:
-                            print(f"  WARNING: No matching row found for word_id {word_id}")
+                    # Find the row with matching word_id
+                    matching_rows = df[df['word_id'] == word_id]
+                    if not matching_rows.empty:
+                        row_index = matching_rows.index[0]
+                        df.loc[row_index, 'answ_1'] = answer
+                        print(f"  Saved answer for word_id {word_id}: '{answer}'")
+                    else:
+                        print(f"  WARNING: No matching row found for word_id {word_id}")
 
                 df.to_csv(latest_csv, index=False)
                 print(f"✓ First test answers saved to {latest_csv}")
