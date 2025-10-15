@@ -27,7 +27,7 @@ class SecondTestScreen:
         # Initialize test variables
         self.current_question = 0
         self.answers = {}  # Store answers by word_id (not question index)
-        self.total_questions = min(20, len(self.word_data))
+        self.total_questions = min(25, len(self.word_data))  # Changed from 20 to 25
 
         # Timer variables
         self.time_remaining = 3 * 60  # 3 minutes in seconds
@@ -87,13 +87,13 @@ class SecondTestScreen:
         cards_title = tk.Label(right_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
         cards_title.pack(pady=(0, 10))
 
-        # Create 4x5 grid of question cards
+        # Create 5x5 grid of question cards
         grid_frame = tk.Frame(right_frame, bg='white')
         grid_frame.pack()
 
         self.question_cards = []
         self.card_frames = []
-        for row in range(4):
+        for row in range(5):  # Changed from 4 to 5
             for col in range(5):
                 num = row * 5 + col + 1
                 if num <= self.total_questions:
@@ -304,22 +304,34 @@ class SecondTestScreen:
                 latest_csv = os.path.join(data_dir, csv_files[-1])
                 df = pd.read_csv(latest_csv)
 
+                # Ensure word_id columns are the same type (int)
+                df['word_id'] = df['word_id'].astype(int)
+
+                print(f"Saving {len(self.answers)} answers to CSV...")
+
                 # Update the answ_2 column with answers using word_id matching
                 for word_id, answer in self.answers.items():
+                    # Ensure word_id is int for matching
+                    word_id = int(word_id)
+
                     # Find the row with matching word_id
                     matching_rows = df[df['word_id'] == word_id]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
                         df.loc[row_index, 'answ_2'] = answer
-                        print(f"Saved answer for word_id {word_id}: '{answer}'")
+                        print(f"  Saved answer for word_id {word_id}: '{answer}'")
+                    else:
+                        print(f"  WARNING: No matching row found for word_id {word_id}")
 
                 df.to_csv(latest_csv, index=False)
-                print(f"Second test answers saved to {latest_csv}")
+                print(f"✓ Second test answers saved to {latest_csv}")
             else:
                 print("No CSV file found to update")
 
         except Exception as e:
             print(f"Error saving second test answers: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_answers(self):
         """Get the current answers dictionary"""

@@ -4,6 +4,7 @@ import pandas as pd
 import csv
 import uuid
 import os
+import random
 from datetime import datetime
 from test_screen import TestScreen
 from second_test_screen import SecondTestScreen
@@ -21,13 +22,51 @@ class ExperimentApp:
         # Load word data
         self.word_data = self.load_word_data()
 
+        # Select random words for both phases
+        self.select_random_word_sets()
+
         # Show welcome screen
         self.show_welcome_screen()
+
+    def select_random_word_sets(self):
+        """Select two sets of 25 random words for the two experiment phases"""
+        total_words = len(self.word_data)
+
+        if total_words < 50:
+            print(f"Warning: Only {total_words} words available. Need at least 50 for two sets of 25.")
+            # If we don't have enough words, use what we have
+            all_indices = list(range(total_words))
+            random.shuffle(all_indices)
+
+            mid_point = min(25, total_words // 2)
+            self.first_phase_indices = all_indices[:mid_point]
+            self.second_phase_indices = all_indices[mid_point:min(mid_point * 2, total_words)]
+        else:
+            # Randomly select 50 unique indices
+            all_indices = list(range(total_words))
+            random.shuffle(all_indices)
+
+            # First 25 for phase 1, next 25 for phase 2
+            self.first_phase_indices = sorted(all_indices[:25])
+            self.second_phase_indices = sorted(all_indices[25:50])
+
+        # Create DataFrames for each phase - keep original indices for CSV matching
+        # Reset index but keep the original word_id for matching
+        self.first_phase_words = self.word_data.iloc[self.first_phase_indices].copy()
+        self.first_phase_words.reset_index(drop=True, inplace=True)
+
+        self.second_phase_words = self.word_data.iloc[self.second_phase_indices].copy()
+        self.second_phase_words.reset_index(drop=True, inplace=True)
+
+        print(f"Phase 1 word indices: {self.first_phase_indices}")
+        print(f"Phase 2 word indices: {self.second_phase_indices}")
+        print(f"Phase 1 first word: {self.first_phase_words.iloc[0]['ice']} -> {self.first_phase_words.iloc[0]['eng']} (word_id: {self.first_phase_words.iloc[0]['word_id']})")
+        print(f"Phase 2 first word: {self.second_phase_words.iloc[0]['ice']} -> {self.second_phase_words.iloc[0]['eng']} (word_id: {self.second_phase_words.iloc[0]['word_id']})")
 
     def load_word_data(self):
         """Load word data from Excel file"""
         try:
-            df = pd.read_excel('word_pairs/dummy_words.xlsx')
+            df = pd.read_excel('../word_pairs/Icelandic_English_Danish_words.xlsx')
             print(f"Excel file loaded successfully! Shape: {df.shape}")
             print(f"Columns: {df.columns.tolist()}")
 
@@ -61,15 +100,9 @@ class ExperimentApp:
             # If we can't find named columns, assume columns by position
             if ice_col is None and eng_col is None:
                 if len(df.columns) >= 2:
-                    # Assume first column is word_id, second is Icelandic, third is English
-                    if len(df.columns) >= 3:
-                        word_id_col = df.columns[0]
-                        ice_col = df.columns[1]
-                        eng_col = df.columns[2]
-                    else:
-                        # Only 2 columns, assume they are Icelandic and English
-                        ice_col = df.columns[0]
-                        eng_col = df.columns[1]
+                    # Assume first column is Icelandic, second is English
+                    ice_col = df.columns[0]
+                    eng_col = df.columns[1]
 
             print(f"Using columns - word_id: {word_id_col}, ice: {ice_col}, eng: {eng_col}")
 
@@ -148,7 +181,7 @@ class ExperimentApp:
         """Create CSV file with unique name and populate with data"""
         # Create unique filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"data/experiment_{self.unique_id}_{timestamp}.csv"
+        filename = f"../data/experiment_{self.unique_id}_{timestamp}.csv"
 
         # Ensure data directory exists
         os.makedirs("../data", exist_ok=True)
@@ -300,8 +333,8 @@ class ExperimentApp:
         word_grid_frame = tk.Frame(grid_frame, bg='white')
         word_grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Display word pairs in 5x4 grid (20 pairs total)
-        self.display_word_grid(word_grid_frame)
+        # Display first 25 word pairs in 5x5 grid (words 1-25)
+        self.display_word_grid(word_grid_frame, word_data=self.first_phase_words, count=25)
 
         # Right side: Information panel and timer
         info_panel = tk.Frame(content_frame, bg='lightgray', width=300, relief=tk.RAISED, bd=1)
@@ -390,22 +423,26 @@ class ExperimentApp:
         # Start the countdown timer
         self.start_countdown_timer()
 
-    def display_word_grid(self, parent_frame):
-        """Display word pairs in a 5x4 grid"""
-        # Ensure we have enough word pairs (pad with empty if needed)
+    def display_word_grid(self, parent_frame, word_data, start_index=0, count=25):
+        """Display word pairs in a 5x5 grid"""
+        # Get the word pairs from the specified range
         word_pairs = []
-        for index, row in self.word_data.iterrows():
-            ice_word = row.get('ice', '')
-            eng_word = row.get('eng', '')
-            if ice_word and eng_word:
-                word_pairs.append((ice_word, eng_word))
+        end_index = min(start_index + count, len(word_data))
 
-        # Pad to exactly 20 pairs if needed
-        while len(word_pairs) < 20:
+        for index in range(start_index, end_index):
+            if index < len(word_data):
+                row = word_data.iloc[index]
+                ice_word = row.get('ice', '')
+                eng_word = row.get('eng', '')
+                if ice_word and eng_word:
+                    word_pairs.append((ice_word, eng_word))
+
+        # Pad to exactly 25 pairs if needed (5x5 grid)
+        while len(word_pairs) < count:
             word_pairs.append(('', ''))
 
-        # Create 4 rows x 5 columns grid
-        for row in range(4):
+        # Create 5 rows x 5 columns grid
+        for row in range(5):
             for col in range(5):
                 index = row * 5 + col
                 if index < len(word_pairs):
@@ -426,12 +463,12 @@ class ExperimentApp:
                     ice_label = tk.Label(
                         pair_frame,
                         text=ice_word,
-                        font=("Arial", 12, "bold"),
+                        font=("Arial", 11, "bold"),
                         bg='lightblue',
                         fg='black',
                         relief=tk.FLAT,
-                        padx=5,
-                        pady=3
+                        padx=4,
+                        pady=2
                     )
                     ice_label.pack(fill=tk.X)
 
@@ -439,17 +476,17 @@ class ExperimentApp:
                     eng_label = tk.Label(
                         pair_frame,
                         text=eng_word,
-                        font=("Arial", 12),
+                        font=("Arial", 11),
                         bg='lightgreen',
                         fg='black',
                         relief=tk.FLAT,
-                        padx=5,
-                        pady=3
+                        padx=4,
+                        pady=2
                     )
                     eng_label.pack(fill=tk.X)
 
         # Configure grid weights for equal distribution
-        for i in range(4):
+        for i in range(5):
             parent_frame.grid_rowconfigure(i, weight=1)
         for i in range(5):
             parent_frame.grid_columnconfigure(i, weight=1)
@@ -488,10 +525,10 @@ class ExperimentApp:
     def on_timer_finished(self):
         """Handle when the countdown timer reaches zero"""
         print("Memorization time finished!")
-        # Use the new TestScreen module
+        # Use the new TestScreen module with first phase words
         self.test_screen = TestScreen(
             root=self.root,
-            word_data=self.word_data,
+            word_data=self.first_phase_words,
             unique_id=self.unique_id,
             completion_callback=self.on_test_completed
         )
@@ -588,17 +625,160 @@ class ExperimentApp:
 
     def on_break_next_clicked(self):
         """Handle next button click from break screen"""
-        print("Break completed, moving to second test")
-        # Move to second test screen instead of completion
+        print("Break completed, moving to second memorizing screen")
+        # Show second memorizing screen before the second test
+        self.show_second_memorizing_screen()
+
+    def show_second_memorizing_screen(self):
+        """Display the second memorizing screen with word pairs before the second test"""
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main container
+        main_container = tk.Frame(self.root, bg='white')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Title
+        title_label = tk.Label(
+            main_container,
+            text="Memorizing Screen - Round 2",
+            font=("Arial", 20, "bold"),
+            bg='white',
+            fg='black'
+        )
+        title_label.pack(pady=(0, 10))
+
+        # Create horizontal layout: word grid on left, info panel on right
+        content_frame = tk.Frame(main_container, bg='white')
+        content_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Left side: Word pairs grid (5 columns x 4 rows)
+        grid_frame = tk.Frame(content_frame, bg='white', relief=tk.RAISED, bd=1)
+        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+
+        # Grid title
+        grid_title = tk.Label(
+            grid_frame,
+            text="Word Pairs",
+            font=("Arial", 16, "bold"),
+            bg='white',
+            fg='black'
+        )
+        grid_title.pack(pady=10)
+
+        # Create the word grid
+        word_grid_frame = tk.Frame(grid_frame, bg='white')
+        word_grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Display next 25 word pairs in 5x5 grid (words 26-50)
+        self.display_word_grid(word_grid_frame, word_data=self.second_phase_words, count=25)
+
+        # Right side: Information panel and timer
+        info_panel = tk.Frame(content_frame, bg='lightgray', width=300, relief=tk.RAISED, bd=1)
+        info_panel.pack(side=tk.RIGHT, fill=tk.Y)
+        info_panel.pack_propagate(False)  # Maintain fixed width
+
+        # Timer display
+        timer_frame = tk.Frame(info_panel, bg='lightgray')
+        timer_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        timer_label = tk.Label(
+            timer_frame,
+            text="Time Remaining:",
+            font=("Arial", 12, "bold"),
+            bg='lightgray',
+            fg='black'
+        )
+        timer_label.pack()
+
+        self.timer_display = tk.Label(
+            timer_frame,
+            text="08:00",
+            font=("Arial", 24, "bold"),
+            bg='lightgray',
+            fg='red'
+        )
+        self.timer_display.pack()
+
+        # Information text area
+        info_title = tk.Label(
+            info_panel,
+            text="Instructions",
+            font=("Arial", 14, "bold"),
+            bg='lightgray',
+            fg='black'
+        )
+        info_title.pack(pady=(10, 5))
+
+        # Create scrollable text widget for information
+        text_frame = tk.Frame(info_panel, bg='lightgray')
+        text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+
+        info_text = tk.Text(
+            text_frame,
+            font=("Arial", 10),
+            bg='white',
+            fg='black',
+            wrap=tk.WORD,
+            height=10
+        )
+
+        info_scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=info_text.yview)
+        info_text.configure(yscrollcommand=info_scrollbar.set)
+
+        info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        info_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Add instruction text for second memorization session
+        instruction_text = """
+        Review the word pairs again. You have 8 minutes to refresh your memory of the associations between the Icelandic and English words.
+
+        After the time expires, you will be tested again on your remembrance of these word pairs. The questions will be presented in a different order.
+
+        Good luck with your second memorization session!
+        """
+
+        info_text.insert(tk.END, instruction_text.strip())
+        info_text.config(state=tk.DISABLED)
+
+        # Add a Next button for testing purposes
+        next_button_frame = tk.Frame(info_panel, bg='lightgray')
+        next_button_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        next_button = tk.Button(
+            next_button_frame,
+            text="Next (Testing)",
+            font=("Arial", 12),
+            bg='orange',
+            fg='white',
+            command=self.on_second_timer_finished,  # Use the new function for second timer
+            width=15,
+            height=2
+        )
+        next_button.pack()
+
+        # Start the countdown timer for second memorization
+        self.start_second_countdown_timer()
+
+    def start_second_countdown_timer(self):
+        """Start the 8-minute countdown timer for second memorization"""
+        self.time_remaining = 8 * 60  # 8 minutes in seconds
+        self.update_timer()
+
+    def on_second_timer_finished(self):
+        """Handle when the second memorization timer reaches zero"""
+        print("Second memorization time finished!")
+        # Move to second test screen
         self.show_second_test_screen()
 
     def show_second_test_screen(self):
         """Display the second test screen with randomized questions"""
         print("Starting second test with randomized questions!")
-        # Create second test screen with randomized question order
+        # Create second test screen with second phase words and randomized question order
         self.second_test_screen = SecondTestScreen(
             root=self.root,
-            word_data=self.word_data,
+            word_data=self.second_phase_words,
             unique_id=self.unique_id,
             completion_callback=self.on_second_test_completed
         )
@@ -650,12 +830,16 @@ class ExperimentApp:
                 self.show_results_screen(first_test_correct, second_test_correct, total_questions,
                                        first_test_percentage, second_test_percentage)
             else:
-                print("No CSV file found for scoring")
-                self.show_final_completion_screen()
+                print("No CSV file found for scoring - showing results with 0 scores")
+                # Show results screen with 0 scores if no CSV file found
+                self.show_results_screen(0, 0, 0, 0, 0)
 
         except Exception as e:
             print(f"Error calculating results: {e}")
-            self.show_final_completion_screen()
+            import traceback
+            traceback.print_exc()
+            # Show results screen with 0 scores on error
+            self.show_results_screen(0, 0, 0, 0, 0)
 
     def show_results_screen(self, first_correct, second_correct, total_questions, first_percentage, second_percentage):
         """Show the results screen"""
