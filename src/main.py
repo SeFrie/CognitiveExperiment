@@ -147,19 +147,9 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Welcome message
-        welcome_label = tk.Label(
-            main_frame,
-            text="Welcome",
-            font=("Arial", 32, "bold"),
-            bg='white',
-            fg='black'
-        )
-        welcome_label.pack(expand=True)
-
-        # Next button in bottom right corner
+        # Next button in upper right corner
         button_frame = tk.Frame(main_frame, bg='white')
-        button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=20)
+        button_frame.pack(side=tk.TOP, fill=tk.X, padx=20, pady=20)
 
         next_button = tk.Button(
             button_frame,
@@ -171,6 +161,16 @@ class ExperimentApp:
             height=2
         )
         next_button.pack(side=tk.RIGHT)
+
+        # Welcome message
+        welcome_label = tk.Label(
+            main_frame,
+            text="Welcome",
+            font=("Arial", 32, "bold"),
+            bg='white',
+            fg='black'
+        )
+        welcome_label.pack(expand=True)
 
     def on_next_clicked(self):
         """Handle next button click - create CSV and show information screen"""
@@ -223,15 +223,31 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-        # Title
+        # Top bar with title and Next button
+        top_bar = tk.Frame(main_frame, bg='white')
+        top_bar.pack(fill=tk.X, pady=(0, 20))
+
+        # Title on the left
         title_label = tk.Label(
-            main_frame,
+            top_bar,
             text="Information",
             font=("Arial", 24, "bold"),
             bg='white',
             fg='black'
         )
-        title_label.pack(pady=(0, 20))
+        title_label.pack(side=tk.LEFT)
+
+        # Next button on the right
+        next_button = tk.Button(
+            top_bar,
+            text="Next",
+            font=("Arial", 14),
+            bg='lightblue',
+            command=self.show_memorizing_screen,
+            width=10,
+            height=2
+        )
+        next_button.pack(side=tk.RIGHT)
 
         # Create text frame with scrollbar
         text_frame = tk.Frame(main_frame, bg='white')
@@ -261,10 +277,11 @@ class ExperimentApp:
         
         We are very grateful for your participation.
         This experiment consists of several parts, including memorization and recall tasks.
-        First you will be presented with a list of word pairs to memorize in 8 minutes.
+        First you will be presented with a list of 25 word pairs to memorize in 4 minutes.
         After a set period of time, you will be tested for 3 minutes on your memory of these word pairs.
         Then you will watch YouTube short for 8 minutes.
-        Finally, you will be tested again on your memory of the word pairs for 3 minutes.
+        After you have watched YouTube short, you will be presented with another list of 25 word pairs to memorize in 4 minutes.
+        Finally, you will be tested again on your memory of the 25 new word pairs for 3 minutes.
         Your responses will be recorded in a text file for analysis.
         
         If you have any questions, feel free to ask the experimenter before we begin.
@@ -275,21 +292,6 @@ class ExperimentApp:
         # Insert dummy text
         text_widget.insert(tk.END, dummy_text.strip())
         text_widget.config(state=tk.DISABLED)  # Make text read-only
-
-        # Next button in bottom right corner
-        button_frame = tk.Frame(main_frame, bg='white')
-        button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(20, 0))
-
-        next_button = tk.Button(
-            button_frame,
-            text="Next",
-            font=("Arial", 14),
-            bg='lightblue',
-            command=self.show_memorizing_screen,
-            width=10,
-            height=2
-        )
-        next_button.pack(side=tk.RIGHT)
 
     def show_memorizing_screen(self):
         """Display the memorizing screen with word pairs, information, and countdown timer"""
@@ -956,15 +958,31 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Title
+        # Top bar with title and Next button
+        top_bar = tk.Frame(main_frame, bg='white')
+        top_bar.pack(fill=tk.X, pady=(0, 30))
+
+        # Title on the left
         title_label = tk.Label(
-            main_frame,
+            top_bar,
             text="Break Time",
             font=("Arial", 32, "bold"),
             bg='white',
             fg='black'
         )
-        title_label.pack(pady=(0, 30))
+        title_label.pack(side=tk.LEFT)
+
+        # Next button on the right
+        next_button = tk.Button(
+            top_bar,
+            text="Next",
+            font=("Arial", 14),
+            bg='lightgreen',
+            command=self.on_break_next_clicked,
+            width=10,
+            height=2
+        )
+        next_button.pack(side=tk.RIGHT)
 
         # Create text frame with scrollbar
         text_frame = tk.Frame(main_frame, bg='white')
@@ -1004,21 +1022,6 @@ class ExperimentApp:
         # Insert break text
         text_widget.insert(tk.END, break_text.strip())
         text_widget.config(state=tk.DISABLED)  # Make text read-only
-
-        # Next button in bottom right corner
-        button_frame = tk.Frame(main_frame, bg='white')
-        button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(20, 0))
-
-        next_button = tk.Button(
-            button_frame,
-            text="Next",
-            font=("Arial", 14),
-            bg='lightgreen',
-            command=self.on_break_next_clicked,
-            width=10,
-            height=2
-        )
-        next_button.pack(side=tk.RIGHT)
 
     def on_break_next_clicked(self):
         """Handle next button click from break screen"""

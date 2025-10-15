@@ -2,6 +2,7 @@ import tkinter as tk
 import pandas as pd
 import os
 import random
+from PIL import Image, ImageTk
 
 
 class TestScreen:
@@ -32,6 +33,8 @@ class TestScreen:
         # Timer variables
         self.time_remaining = 3 * 60  # 3 minutes in seconds
         self.timer_display = None
+        self.timer_running = True  # Flag to control timer
+        self.timer_id = None  # Store timer callback ID
 
         # UI components
         self.question_cards = []
@@ -41,9 +44,25 @@ class TestScreen:
         self.prev_button = None
         self.next_button = None
 
+        # Load DTU logo (small version)
+        self.logo_small = None
+        self.load_logo()
+
         print(f"First test created with randomized order: {self.question_indices[:5]}...")
 
         self.setup_ui()
+
+    def load_logo(self):
+        """Load DTU logo in small size"""
+        try:
+            logo_path = "../dtu_logo.png"
+            logo_img = Image.open(logo_path)
+            logo_img = logo_img.resize((60, 24), Image.LANCZOS)
+            self.logo_small = ImageTk.PhotoImage(logo_img)
+            print("DTU logo loaded for test screen")
+        except Exception as e:
+            print(f"Error loading DTU logo: {e}")
+            self.logo_small = None
 
     def setup_ui(self):
         """Setup the test screen user interface"""
@@ -55,67 +74,59 @@ class TestScreen:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Timer in upper left corner
-        timer_frame = tk.Frame(main_frame, bg='white')
-        timer_frame.pack(anchor='nw', pady=(0, 10))
+        # Upper left corner: Timer and Question cards
+        upper_left_frame = tk.Frame(main_frame, bg='white')
+        upper_left_frame.pack(anchor='nw', pady=(0, 10))
 
-        timer_label = tk.Label(timer_frame, text="Time Remaining:", font=("Arial", 12, "bold"), bg='white')
+        # Timer
+        timer_label = tk.Label(upper_left_frame, text="Time Remaining:", font=("Arial", 12, "bold"), bg='white')
         timer_label.pack()
 
-        self.timer_display = tk.Label(timer_frame, text="03:00", font=("Arial", 20, "bold"),
+        self.timer_display = tk.Label(upper_left_frame, text="03:00", font=("Arial", 20, "bold"),
                                     bg='white', fg='red')
         self.timer_display.pack()
 
-        # Title
-        title = tk.Label(main_frame, text="Test Screen", font=("Arial", 24, "bold"), bg='white')
-        title.pack(pady=10)
+        # Question cards title
+        cards_title = tk.Label(upper_left_frame, text="Questions", font=("Arial", 10, "bold"), bg='white')
+        cards_title.pack(pady=(10, 5))
 
-        # Create two-column layout
-        content_container = tk.Frame(main_frame, bg='white')
-        content_container.pack(fill=tk.BOTH, expand=True)
-
-        # Left column: Question and navigation
-        left_frame = tk.Frame(content_container, bg='white')
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
-
-        # Right column: Question cards
-        right_frame = tk.Frame(content_container, bg='white', width=250)
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y)
-        right_frame.pack_propagate(False)
-
-        # Question cards in right frame
-        cards_title = tk.Label(right_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
-        cards_title.pack(pady=(0, 10))
-
-        # Create 5x5 grid of question cards
-        grid_frame = tk.Frame(right_frame, bg='white')
+        # Create 5x5 grid of question cards (smaller)
+        grid_frame = tk.Frame(upper_left_frame, bg='white')
         grid_frame.pack()
 
         self.question_cards = []
         self.card_frames = []  # Store the border frames
-        for row in range(5):  # Changed from 4 to 5
+        for row in range(5):
             for col in range(5):
                 num = row * 5 + col + 1
                 if num <= self.total_questions:
                     # Create a frame for the border (this will show the red/green color)
                     border_frame = tk.Frame(grid_frame, bg='red', bd=0)  # Start with red (unanswered)
-                    border_frame.grid(row=row, column=col, padx=2, pady=2)
+                    border_frame.grid(row=row, column=col, padx=1, pady=1)
 
-                    # Create the card inside the border frame
-                    card = tk.Label(border_frame, text=str(num), font=("Arial", 10, "bold"),
-                                  bg='white', width=4, height=2, relief=tk.FLAT)
-                    card.pack(padx=3, pady=3)  # This creates the border effect
+                    # Create the card inside the border frame (smaller size)
+                    card = tk.Label(border_frame, text=str(num), font=("Arial", 8, "bold"),
+                                  bg='white', width=3, height=1, relief=tk.FLAT)
+                    card.pack(padx=2, pady=2)  # This creates the border effect
                     card.bind('<Button-1>', lambda e, q=num-1: self.jump_to_question(q))
 
                     self.question_cards.append(card)
                     self.card_frames.append(border_frame)
 
-        # Question display in left frame
-        self.question_label = tk.Label(left_frame, text="", font=("Arial", 32, "bold"), bg='white')
+        # Title
+        title = tk.Label(main_frame, text="Test Screen", font=("Arial", 24, "bold"), bg='white')
+        title.pack(pady=10)
+
+        # Content area for question and navigation
+        content_frame = tk.Frame(main_frame, bg='white')
+        content_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Question display
+        self.question_label = tk.Label(content_frame, text="", font=("Arial", 32, "bold"), bg='white')
         self.question_label.pack(expand=True)
 
-        # Navigation area - bottom of left frame
-        nav_frame = tk.Frame(left_frame, bg='white')
+        # Navigation area - bottom
+        nav_frame = tk.Frame(content_frame, bg='white')
         nav_frame.pack(side=tk.BOTTOM, pady=20)
 
         # Input instruction
@@ -150,6 +161,12 @@ class TestScreen:
                                           font=("Arial", 12), bg='orange', fg='white',
                                           command=self.finish_test, width=20, height=2)
         self.finish_test_button.pack()
+
+        # Logo display (top right corner)
+        if self.logo_small:
+            logo_label = tk.Label(main_frame, image=self.logo_small, bg='white')
+            logo_label.image = self.logo_small  # Keep a reference to avoid garbage-collection
+            logo_label.pack(side=tk.TOP, anchor='ne', padx=10, pady=10)
 
         # Start with first question
         self.display_current_question()
