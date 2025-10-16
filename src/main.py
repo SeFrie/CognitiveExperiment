@@ -13,7 +13,7 @@ class ExperimentApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Cognitive Science Experiment")
-        self.root.geometry("800x600")
+        self.root.geometry("1200x800")
         self.root.configure(bg='white')
 
         # Generate unique ID for this session
@@ -347,24 +347,24 @@ class ExperimentApp:
                 bg='white',
                 relief=tk.FLAT,
                 bd=0,
-                padx=1,
+                padx=0,
                 pady=0
             )
-            pair_frame.pack(fill=tk.X, padx=1, pady=0)
+            pair_frame.pack(padx=0, pady=0)
 
             # Number label (smaller)
             number_label = tk.Label(
                 pair_frame,
                 text=f"{index + 1}.",
-                font=("Arial", 9, "bold"),
+                font=("Arial", 8, "bold"),
                 bg='white',
                 fg='black',
                 width=2,
-                anchor='w'
+                anchor='e'
             )
-            number_label.pack(side=tk.LEFT, padx=(0, 2))
+            number_label.pack(side=tk.LEFT, padx=(0, 3))
 
-            # Icelandic word (no background color)
+            # Icelandic word (centered, right-aligned)
             ice_label = tk.Label(
                 pair_frame,
                 text=ice_word,
@@ -372,24 +372,25 @@ class ExperimentApp:
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
-                padx=2,
+                padx=3,
                 pady=0,
                 width=18,
-                anchor='w'
+                anchor='e'
             )
             ice_label.pack(side=tk.LEFT, padx=1)
 
-            # Arrow (smaller)
+            # Arrow (bigger and centered)
             arrow_label = tk.Label(
                 pair_frame,
                 text="→",
-                font=("Arial", 10, "bold"),
+                font=("Arial", 14, "bold"),
                 bg='white',
-                fg='black'
+                fg='darkblue',
+                width=2
             )
-            arrow_label.pack(side=tk.LEFT, padx=1)
+            arrow_label.pack(side=tk.LEFT, padx=5)
 
-            # English word (no background color)
+            # English word (centered, left-aligned)
             eng_label = tk.Label(
                 pair_frame,
                 text=eng_word,
@@ -397,7 +398,7 @@ class ExperimentApp:
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
-                padx=2,
+                padx=3,
                 pady=0,
                 width=18,
                 anchor='w'
@@ -1013,7 +1014,7 @@ class ExperimentApp:
         You have now finished the first memory test.
 
         The next part of the experiment will begin when you click the "Next" button below.
-        
+
         When you're ready to continue with the next phase of the experiment, please click the "Next" button.
 
         Thank you for your continued participation in this cognitive science research!
@@ -1083,24 +1084,24 @@ class ExperimentApp:
                 bg='white',
                 relief=tk.FLAT,
                 bd=0,
-                padx=1,
+                padx=0,
                 pady=0
             )
-            pair_frame.pack(fill=tk.X, padx=1, pady=0)
+            pair_frame.pack(padx=0, pady=0)
 
             # Number label (smaller)
             number_label = tk.Label(
                 pair_frame,
                 text=f"{index + 1}.",
-                font=("Arial", 9, "bold"),
+                font=("Arial", 8, "bold"),
                 bg='white',
                 fg='black',
                 width=2,
-                anchor='w'
+                anchor='e'
             )
-            number_label.pack(side=tk.LEFT, padx=(0, 2))
+            number_label.pack(side=tk.LEFT, padx=(0, 3))
 
-            # Icelandic word (no background color)
+            # Icelandic word (centered, right-aligned)
             ice_label = tk.Label(
                 pair_frame,
                 text=ice_word,
@@ -1108,24 +1109,25 @@ class ExperimentApp:
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
-                padx=2,
+                padx=3,
                 pady=0,
                 width=18,
-                anchor='w'
+                anchor='e'
             )
             ice_label.pack(side=tk.LEFT, padx=1)
 
-            # Arrow (smaller)
+            # Arrow (bigger and centered)
             arrow_label = tk.Label(
                 pair_frame,
                 text="→",
-                font=("Arial", 10, "bold"),
+                font=("Arial", 14, "bold"),
                 bg='white',
-                fg='black'
+                fg='darkblue',
+                width=2
             )
-            arrow_label.pack(side=tk.LEFT, padx=1)
+            arrow_label.pack(side=tk.LEFT, padx=5)
 
-            # English word (no background color)
+            # English word (centered, left-aligned)
             eng_label = tk.Label(
                 pair_frame,
                 text=eng_word,
@@ -1133,7 +1135,7 @@ class ExperimentApp:
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
-                padx=2,
+                padx=3,
                 pady=0,
                 width=18,
                 anchor='w'
