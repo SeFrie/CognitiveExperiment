@@ -870,9 +870,9 @@ class ExperimentApp:
 
             # Initialize counters
             first_correct = 0
-            first_total = 0
+            first_answered = 0
             second_correct = 0
-            second_total = 0
+            second_answered = 0
 
             first_details = []
             second_details = []
@@ -886,7 +886,7 @@ class ExperimentApp:
 
                 # Check first test answer
                 if answer_1:
-                    first_total += 1
+                    first_answered += 1
                     is_correct = (answer_1 == eng_word)
                     if is_correct:
                         first_correct += 1
@@ -899,7 +899,7 @@ class ExperimentApp:
 
                 # Check second test answer
                 if answer_2:
-                    second_total += 1
+                    second_answered += 1
                     is_correct = (answer_2 == eng_word)
                     if is_correct:
                         second_correct += 1
@@ -910,12 +910,16 @@ class ExperimentApp:
                         'correct': is_correct
                     })
 
-            # Calculate percentages
+            # Fixed: Always use 25 as the total for each test (this is how many words are tested)
+            first_total = 25
+            second_total = 25
+
+            # Calculate percentages based on 25 questions each
             first_percentage = (first_correct / first_total * 100) if first_total > 0 else 0
             second_percentage = (second_correct / second_total * 100) if second_total > 0 else 0
             total_correct = first_correct + second_correct
-            total_answered = first_total + second_total
-            overall_percentage = (total_correct / total_answered * 100) if total_answered > 0 else 0
+            total_answered = first_answered + second_answered
+            overall_percentage = (total_correct / 50 * 100)  # Out of 50 total (25+25)
 
             results = {
                 'first_correct': first_correct,
@@ -925,7 +929,7 @@ class ExperimentApp:
                 'second_total': second_total,
                 'second_percentage': second_percentage,
                 'total_correct': total_correct,
-                'total_answered': total_answered,
+                'total_answered': 50,  # Always 50 (25 + 25)
                 'overall_percentage': overall_percentage,
                 'first_details': first_details,
                 'second_details': second_details,
@@ -935,7 +939,7 @@ class ExperimentApp:
             print(f"Results calculated:")
             print(f"  First Test: {first_correct}/{first_total} ({first_percentage:.1f}%)")
             print(f"  Second Test: {second_correct}/{second_total} ({second_percentage:.1f}%)")
-            print(f"  Overall: {total_correct}/{total_answered} ({overall_percentage:.1f}%)")
+            print(f"  Overall: {total_correct}/50 ({overall_percentage:.1f}%)")
 
             return results
 
