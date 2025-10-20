@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="Cleaner look on the memorizing screens">
+    <list default="true" id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/word_pairs/Icelandic_English_Danish_words.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/word_pairs/Icelandic_English_Danish_words.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +96,7 @@
       <workItem from="1760571478532" duration="242000" />
       <workItem from="1760571731135" duration="3290000" />
       <workItem from="1760696289109" duration="128000" />
-      <workItem from="1760696706852" duration="2482000" />
+      <workItem from="1760696706852" duration="4712000" />
     </task>
     <task id="LOCAL-00001" summary="minor excel adjustments">
       <option name="closed" value="true" />
@@ -172,7 +170,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760575006181</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50">
+      <option name="closed" value="true" />
+      <created>1760710280542</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760710280542</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -210,11 +216,12 @@
     <MESSAGE value="Better random selection in the first memorizing and test set, so that memorizing set is randomized before the test set is shown." />
     <MESSAGE value="Next buttons moved to upper right corner of relevant screens" />
     <MESSAGE value="Cleaner look on the memorizing screens" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cleaner look on the memorizing screens" />
+    <MESSAGE value="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50" />
+    <option name="LAST_COMMIT_MESSAGE" value="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CognitiveExperiment$test_screen.coverage" NAME="test_screen Coverage Results" MODIFIED="1760571756868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/CognitiveExperiment$main.coverage" NAME="main Coverage Results" MODIFIED="1760710143694" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$main.coverage" NAME="main Coverage Results" MODIFIED="1760727461892" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/CognitiveExperiment$main_clean.coverage" NAME="main_clean Coverage Results" MODIFIED="1760568417314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/CognitiveExperiment$second_test_screen.coverage" NAME="second_test_screen Coverage Results" MODIFIED="1760523989980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
