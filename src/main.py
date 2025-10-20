@@ -182,10 +182,10 @@ class ExperimentApp:
         """Create CSV file with unique name and populate with data"""
         # Create unique filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"../data/experiment_{self.unique_id}_{timestamp}.csv"
+        filename = f"data/experiment_{self.unique_id}_{timestamp}.csv"
 
         # Ensure data directory exists
-        os.makedirs("../data", exist_ok=True)
+        os.makedirs("data", exist_ok=True)
 
         # Prepare data for CSV
         csv_data = []
@@ -848,7 +848,7 @@ class ExperimentApp:
     def calculate_results(self):
         """Calculate results from the CSV file"""
         try:
-            data_dir = "../data"
+            data_dir = "data"
             if not os.path.exists(data_dir):
                 print("Data directory not found")
                 return None
