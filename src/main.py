@@ -66,7 +66,7 @@ class ExperimentApp:
     def load_word_data(self):
         """Load word data from Excel file"""
         try:
-            df = pd.read_excel('word_pairs/Icelandic_English_Danish_words.xlsx')
+            df = pd.read_excel('word_pairs/Icelandic-English-Danish_SHORT.xlsx')
             print(f"Excel file loaded successfully! Shape: {df.shape}")
             print(f"Columns: {df.columns.tolist()}")
 
