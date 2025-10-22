@@ -285,7 +285,7 @@ class SecondTestScreen:
         self.update_timer()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file with answ_2=1 and flipped condition for second test"""
+        """Save the answers to the CSV file with test_id=1 and flipped condition for second test"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -310,7 +310,7 @@ class SecondTestScreen:
                 # Personalized=False: Test 1 gets 'N', Test 2 gets 'P'
                 second_test_condition = 'N' if self.personalization_flag else 'P'
 
-                # Update answ_1, answ_2 (1 for second test), and condition (flipped)
+                # Update answer, test_id (1 for second test), and condition (flipped)
                 for word_id, answer in self.answers.items():
                     word_id = int(word_id)
 
@@ -318,11 +318,11 @@ class SecondTestScreen:
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
 
-                        df.loc[row_index, 'answ_1'] = answer  # Store answer in answ_1
-                        df.loc[row_index, 'answ_2'] = 1  # Test 2 = 1
+                        df.loc[row_index, 'answer'] = answer  # Store answer in answer
+                        df.loc[row_index, 'test_id'] = 1  # Test 2 = 1
                         df.loc[row_index, 'condition'] = second_test_condition  # Flipped condition
 
-                        print(f"  Saved word_id {word_id}: '{answer}' (Test 2, answ_2=1, condition={second_test_condition})")
+                        print(f"  Saved word_id {word_id}: '{answer}' (Test 2, answer=1, condition={second_test_condition})")
                     else:
                         print(f"  WARNING: No matching row found for word_id {word_id}")
 

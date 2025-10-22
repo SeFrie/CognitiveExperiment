@@ -22,6 +22,12 @@ class ExperimentApp:
         # Initialize personalization flag (will be set based on button click)
         self.personalization_flag = None
 
+        # Initialize Icelandic knowledge flag (will be set based on rating)
+        self.knows_icelandic = None
+
+        # Initialize YouTube usage rating (will be set based on button click)
+        self.youtube_usage = None
+
         # Load word data
         self.word_data = self.load_word_data()
 
@@ -164,6 +170,48 @@ class ExperimentApp:
         )
         welcome_label.pack(expand=True)
 
+        # Icelandic knowledge question frame
+        icelandic_frame = tk.Frame(main_frame, bg='white')
+        icelandic_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 10))
+
+        # Question label
+        question_label = tk.Label(
+            icelandic_frame,
+            text="Do you know Icelandic?",
+            font=("Arial", 16, "bold"),
+            bg='white',
+            fg='black'
+        )
+        question_label.pack(pady=(0, 10))
+
+        # Buttons frame for Yes/No
+        icelandic_buttons_frame = tk.Frame(icelandic_frame, bg='white')
+        icelandic_buttons_frame.pack()
+
+        # Yes button
+        yes_button = tk.Button(
+            icelandic_buttons_frame,
+            text="Yes",
+            font=("Arial", 14),
+            bg='lightgreen',
+            command=self.on_icelandic_yes_clicked,
+            width=15,
+            height=2
+        )
+        yes_button.pack(side=tk.LEFT, padx=10)
+
+        # No button
+        no_button = tk.Button(
+            icelandic_buttons_frame,
+            text="No",
+            font=("Arial", 14),
+            bg='lightcoral',
+            command=self.on_icelandic_no_clicked,
+            width=15,
+            height=2
+        )
+        no_button.pack(side=tk.LEFT, padx=10)
+
         # Personalization buttons frame
         personalization_frame = tk.Frame(main_frame, bg='white')
         personalization_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 20))
@@ -192,6 +240,70 @@ class ExperimentApp:
         )
         non_personalized_button.pack(side=tk.RIGHT, padx=5)
 
+        # YouTube usage rating frame
+        youtube_frame = tk.Frame(main_frame, bg='white')
+        youtube_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 10))
+
+        # Question label
+        youtube_label = tk.Label(
+            youtube_frame,
+            text="How much time do you spend on YouTube Shorts?",
+            font=("Arial", 16, "bold"),
+            bg='white',
+            fg='black'
+        )
+        youtube_label.pack(pady=(0, 10))
+
+        # Buttons frame for time options
+        youtube_buttons_frame = tk.Frame(youtube_frame, bg='white')
+        youtube_buttons_frame.pack()
+
+        # 0-15 min button
+        min_15_button = tk.Button(
+            youtube_buttons_frame,
+            text="0-15 minutes",
+            font=("Arial", 14),
+            bg='lightgreen',
+            command=lambda: self.on_youtube_usage_selected(1),
+            width=15,
+            height=2
+        )
+        min_15_button.pack(side=tk.LEFT, padx=10)
+
+        # 16-45 min button
+        min_45_button = tk.Button(
+            youtube_buttons_frame,
+            text="16-45 minutes",
+            font=("Arial", 14),
+            bg='lightyellow',
+            command=lambda: self.on_youtube_usage_selected(2),
+            width=15,
+            height=2
+        )
+        min_45_button.pack(side=tk.LEFT, padx=10)
+
+        # More than 45 min button
+        more_45_button = tk.Button(
+            youtube_buttons_frame,
+            text="More than 45 minutes",
+            font=("Arial", 14),
+            bg='lightcoral',
+            command=lambda: self.on_youtube_usage_selected(3),
+            width=15,
+            height=2
+        )
+        more_45_button.pack(side=tk.LEFT, padx=10)
+
+    def on_icelandic_yes_clicked(self):
+        """Handle Icelandic Yes button click"""
+        print("Icelandic knowledge: Yes")
+        self.knows_icelandic = "Yes"
+
+    def on_icelandic_no_clicked(self):
+        """Handle Icelandic No button click"""
+        print("Icelandic knowledge: No")
+        self.knows_icelandic = "No"
+
     def on_personalized_clicked(self):
         """Handle personalized button click"""
         print("Personalized option selected")
@@ -205,6 +317,21 @@ class ExperimentApp:
         self.personalization_flag = False  # Set flag for non-personalized
         self.create_csv_file()  # Create CSV file
         self.show_information_screen()  # Show information screen
+
+    def on_youtube_usage_selected(self, option):
+        """Handle YouTube usage rating button click"""
+        if option == 1:
+            print("YouTube usage: 0-15 minutes")
+            self.youtube_usage = "0-15 minutes"
+        elif option == 2:
+            print("YouTube usage: 16-45 minutes")
+            self.youtube_usage = "16-45 minutes"
+        elif option == 3:
+            print("YouTube usage: More than 45 minutes")
+            self.youtube_usage = "More than 45 minutes"
+
+        # Optionally, you can directly show the information screen after selection
+        # self.show_information_screen()
 
     def on_next_clicked(self):
         """Handle next button click - create CSV and show information screen"""
@@ -223,25 +350,27 @@ class ExperimentApp:
         # Prepare data for CSV
         csv_data = []
 
-        # Add header with condition column
-        csv_data.append(['id', 'word_id', 'ice', 'eng', 'answ_1', 'answ_2', 'condition'])
+        # Add header with condition, knows_icelandic, and youtube_usage columns
+        csv_data.append(['id', 'word_id', 'ice', 'eng', 'answer', 'test_id', 'condition', 'knows_icelandic', 'youtube_usage'])
 
-        # Initially set answ_2 to empty string (will be set by test screens)
+        # Initially set test_id to empty string (will be set by test screens)
         # Initially set condition based on personalization choice (will be updated by test screens)
         # Personalized: First test gets P, Second test gets N
         # Non-personalized: First test gets N, Second test gets P
         initial_condition = 'P' if self.personalization_flag else 'N'
 
-        # Add data rows - leave answ_2 and condition empty initially
+        # Add data rows - leave test_id and condition empty initially
         for index, row in self.word_data.iterrows():
             csv_row = [
                 self.unique_id,  # unique id
                 int(row.get('word_id', index + 1)),  # word_id from Excel or index
                 row.get('ice', ''),  # Icelandic word
                 row.get('eng', ''),  # English word
-                '',  # answ_1 - empty for now
-                '',  # answ_2 - will be set by test screens (0 or 1)
-                ''   # condition - will be set by test screens (P or N)
+                '',  # answer - empty for now
+                '',  # test_id - will be set by test screens (0 or 1)
+                '',  # condition - will be set by test screens (P or N)
+                self.knows_icelandic if self.knows_icelandic else '',  # knows_icelandic - Yes or No
+                self.youtube_usage if self.youtube_usage else ''  # youtube_usage - time range
             ]
             csv_data.append(csv_row)
 
@@ -255,6 +384,8 @@ class ExperimentApp:
                 writer.writerows(csv_data)
             print(f"CSV file created: {filename}")
             print(f"Initial personalization choice: {'Personalized' if self.personalization_flag else 'Non-personalized'}")
+            print(f"Knows Icelandic: {self.knows_icelandic if self.knows_icelandic else 'Not specified'}")
+            print(f"YouTube usage: {self.youtube_usage if self.youtube_usage else 'Not specified'}")
             print(f"Test 1 will use condition: {initial_condition}")
             print(f"Test 2 will use condition: {'N' if initial_condition == 'P' else 'P'}")
         except Exception as e:
@@ -648,7 +779,7 @@ class ExperimentApp:
         self.show_second_memorizing_screen()
 
     def show_first_break_screen(self):
-        """Display the first 8-minute break screen after first test"""
+        """Display the first 8-minute break screen after second memorization"""
         # Cancel the first memorization timer to prevent interference
         if hasattr(self, 'first_timer_id'):
             try:
@@ -754,9 +885,88 @@ class ExperimentApp:
             except:
                 pass
 
-        print("First break finished! Starting first test...")
-        # After first break, show first test screen
-        # Pass personalization flag to test screen
+        print("First break finished! Showing get ready screen...")
+        # After first break, show get ready screen before first test
+        self.show_first_get_ready_screen()
+
+    def show_first_get_ready_screen(self):
+        """Display the get ready screen before first test with 20 second countdown"""
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main frame
+        main_frame = tk.Frame(self.root, bg='white')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Title
+        title_label = tk.Label(
+            main_frame,
+            text="Get Ready for the Next Test",
+            font=("Arial", 36, "bold"),
+            bg='white',
+            fg='darkblue'
+        )
+        title_label.pack(pady=(50, 30))
+
+        # Countdown timer display
+        self.timer_display = tk.Label(
+            main_frame,
+            text="20",
+            font=("Arial", 72, "bold"),
+            bg='white',
+            fg='red'
+        )
+        self.timer_display.pack(pady=40)
+
+        # Instructions
+        instruction_text = tk.Label(
+            main_frame,
+            text="The test will start in 20 seconds.\n\nPlease get ready!",
+            font=("Arial", 18),
+            bg='white',
+            fg='black',
+            justify=tk.CENTER
+        )
+        instruction_text.pack(pady=30)
+
+        # Start the 20-second countdown timer
+        self.get_ready_time_remaining = 20
+        self.update_first_get_ready_timer()
+
+    def update_first_get_ready_timer(self):
+        """Update the get ready timer display for first test"""
+        if hasattr(self, 'get_ready_time_remaining') and self.get_ready_time_remaining > 0:
+            time_text = str(self.get_ready_time_remaining)
+
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text=time_text)
+                # Change color based on time remaining
+                if self.get_ready_time_remaining <= 5:
+                    self.timer_display.config(fg='red')
+                elif self.get_ready_time_remaining <= 10:
+                    self.timer_display.config(fg='orange')
+                else:
+                    self.timer_display.config(fg='darkblue')
+
+            self.get_ready_time_remaining -= 1
+            self.get_ready_timer_id = self.root.after(1000, self.update_first_get_ready_timer)
+        else:
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text="0", fg='red')
+            self.on_first_get_ready_finished()
+
+    def on_first_get_ready_finished(self):
+        """Handle when first get ready timer finishes"""
+        # Cancel the timer to prevent interference
+        if hasattr(self, 'get_ready_timer_id'):
+            try:
+                self.root.after_cancel(self.get_ready_timer_id)
+            except:
+                pass
+
+        print("Get ready finished! Starting first test...")
+        # Start first test screen
         self.test_screen = TestScreen(
             root=self.root,
             word_data=self.first_phase_words,
@@ -907,9 +1117,88 @@ class ExperimentApp:
             except:
                 pass
 
-        print("Second break finished! Starting second test...")
-        # After second break, show second test screen
-        # Pass personalization flag to second test screen
+        print("Second break finished! Showing get ready screen...")
+        # After second break, show get ready screen before second test
+        self.show_second_get_ready_screen()
+
+    def show_second_get_ready_screen(self):
+        """Display the get ready screen before second test with 20 second countdown"""
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main frame
+        main_frame = tk.Frame(self.root, bg='white')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Title
+        title_label = tk.Label(
+            main_frame,
+            text="Get Ready for the Next Test",
+            font=("Arial", 36, "bold"),
+            bg='white',
+            fg='darkblue'
+        )
+        title_label.pack(pady=(50, 30))
+
+        # Countdown timer display
+        self.timer_display = tk.Label(
+            main_frame,
+            text="20",
+            font=("Arial", 72, "bold"),
+            bg='white',
+            fg='red'
+        )
+        self.timer_display.pack(pady=40)
+
+        # Instructions
+        instruction_text = tk.Label(
+            main_frame,
+            text="The test will start in 20 seconds.\n\nPlease get ready!",
+            font=("Arial", 18),
+            bg='white',
+            fg='black',
+            justify=tk.CENTER
+        )
+        instruction_text.pack(pady=30)
+
+        # Start the 20-second countdown timer
+        self.get_ready_time_remaining_2 = 20
+        self.update_second_get_ready_timer()
+
+    def update_second_get_ready_timer(self):
+        """Update the get ready timer display for second test"""
+        if hasattr(self, 'get_ready_time_remaining_2') and self.get_ready_time_remaining_2 > 0:
+            time_text = str(self.get_ready_time_remaining_2)
+
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text=time_text)
+                # Change color based on time remaining
+                if self.get_ready_time_remaining_2 <= 5:
+                    self.timer_display.config(fg='red')
+                elif self.get_ready_time_remaining_2 <= 10:
+                    self.timer_display.config(fg='orange')
+                else:
+                    self.timer_display.config(fg='darkblue')
+
+            self.get_ready_time_remaining_2 -= 1
+            self.get_ready_timer_id_2 = self.root.after(1000, self.update_second_get_ready_timer)
+        else:
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text="0", fg='red')
+            self.on_second_get_ready_finished()
+
+    def on_second_get_ready_finished(self):
+        """Handle when second get ready timer finishes"""
+        # Cancel the timer to prevent interference
+        if hasattr(self, 'get_ready_timer_id_2'):
+            try:
+                self.root.after_cancel(self.get_ready_timer_id_2)
+            except:
+                pass
+
+        print("Get ready finished! Starting second test...")
+        # Start second test screen
         self.second_test_screen = SecondTestScreen(
             root=self.root,
             word_data=self.second_phase_words,
@@ -1149,8 +1438,8 @@ class ExperimentApp:
             for _, row in df.iterrows():
                 ice_word = str(row.get('ice', '')).strip().lower()
                 eng_word = str(row.get('eng', '')).strip().lower()
-                answer_1 = str(row.get('answ_1', '')).strip().lower()
-                answer_2 = str(row.get('answ_2', '')).strip().lower()
+                answer_1 = str(row.get('answer', '')).strip().lower()
+                answer_2 = str(row.get('test_id', '')).strip().lower()
 
                 # Check first test answer
                 if answer_1:
@@ -1161,7 +1450,7 @@ class ExperimentApp:
                     first_details.append({
                         'ice': row.get('ice', ''),
                         'eng': row.get('eng', ''),
-                        'answer': row.get('answ_1', ''),
+                        'answer': row.get('answer', ''),
                         'correct': is_correct
                     })
 
@@ -1174,7 +1463,7 @@ class ExperimentApp:
                     second_details.append({
                         'ice': row.get('ice', ''),
                         'eng': row.get('eng', ''),
-                        'answer': row.get('answ_2', ''),
+                        'answer': row.get('test_id', ''),
                         'correct': is_correct
                     })
 

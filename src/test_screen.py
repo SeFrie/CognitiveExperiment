@@ -333,10 +333,10 @@ class TestScreen:
                     matching_rows = df[df['word_id'] == word_id]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
-                        df.loc[row_index, 'answ_1'] = answer
-                        df.loc[row_index, 'answ_2'] = 0  # Test 1 = 0
+                        df.loc[row_index, 'answer'] = answer
+                        df.loc[row_index, 'test_id'] = 0  # Test 1 = 0
                         df.loc[row_index, 'condition'] = first_test_condition
-                        print(f"  Saved word_id {word_id}: '{answer}' (Test 1, answ_2=0, condition={first_test_condition})")
+                        print(f"  Saved word_id {word_id}: '{answer}' (Test 1, test_id=0, condition={first_test_condition})")
                     else:
                         print(f"  WARNING: No matching row found for word_id {word_id}")
 

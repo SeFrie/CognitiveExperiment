@@ -1,0 +1,41 @@
+id,word_id,ice,eng,answer,test_id,condition,knows_icelandic,youtube_usage
+a9c90e85,1,fjall,mountain,uyt,0.0,P,,More than 45 minutes
+a9c90e85,2,eldur,fire,,,,,More than 45 minutes
+a9c90e85,3,gleði,joy,,,,,More than 45 minutes
+a9c90e85,4,draumur,dream,,,,,More than 45 minutes
+a9c90e85,5,hljóð,sound,rwth,1.0,N,,More than 45 minutes
+a9c90e85,6,vor,spring,,,,,More than 45 minutes
+a9c90e85,7,haust,autumn,ku,1.0,N,,More than 45 minutes
+a9c90e85,8,tungl,moon,jttyj,1.0,N,,More than 45 minutes
+a9c90e85,9,haf,sea,,,,,More than 45 minutes
+a9c90e85,10,ást,love,thwr,1.0,N,,More than 45 minutes
+a9c90e85,11,friður,peace,,,,,More than 45 minutes
+a9c90e85,12,reiði,anger,,,,,More than 45 minutes
+a9c90e85,13,synda,swim,rhfh,1.0,N,,More than 45 minutes
+a9c90e85,14,vinna,work,rthytr,1.0,N,,More than 45 minutes
+a9c90e85,15,hlæja,laugh,rthwrth,1.0,N,,More than 45 minutes
+a9c90e85,16,gráta,cry,,,,,More than 45 minutes
+a9c90e85,17,borða,eat,,,,,More than 45 minutes
+a9c90e85,18,hlaupa,run,,,,,More than 45 minutes
+a9c90e85,19,ganga,walk,hrtrw,1.0,N,,More than 45 minutes
+a9c90e85,20,sjá,see,ouy,0.0,P,,More than 45 minutes
+a9c90e85,21,heyra,hear,hrt,1.0,N,,More than 45 minutes
+a9c90e85,22,hugsa,think,hytyht,1.0,N,,More than 45 minutes
+a9c90e85,23,vita,know,,,,,More than 45 minutes
+a9c90e85,24,framkvæmt,implementation,rthwhrwth,1.0,N,,More than 45 minutes
+a9c90e85,25,forystumaður,leader,,,,,More than 45 minutes
+a9c90e85,26,borg,city,regwrtg,1.0,N,,More than 45 minutes
+a9c90e85,27,hurð,door,ju6,1.0,N,,More than 45 minutes
+a9c90e85,28,gluggi,window,rw,1.0,N,,More than 45 minutes
+a9c90e85,29,mynd,picture,,,,,More than 45 minutes
+a9c90e85,30,þögn,silence,,,,,More than 45 minutes
+a9c90e85,31,heppinn,lucky,tre,0.0,P,,More than 45 minutes
+a9c90e85,32,safn,museum ,,,,,More than 45 minutes
+a9c90e85,33,ferð,trip ,hrwthw,1.0,N,,More than 45 minutes
+a9c90e85,34,rödd,voice,rt,1.0,N,,More than 45 minutes
+a9c90e85,35,sársauki,pain,ki7uk,1.0,N,,More than 45 minutes
+a9c90e85,36,hreyfa,move,htr,1.0,N,,More than 45 minutes
+a9c90e85,37,fjöldi,number ,ky,1.0,N,,More than 45 minutes
+a9c90e85,38,verkefni,project ,,,,,More than 45 minutes
+a9c90e85,39,árangur,success,trwy,1.0,N,,More than 45 minutes
+a9c90e85,40,skap,mood ,,,,,More than 45 minutes

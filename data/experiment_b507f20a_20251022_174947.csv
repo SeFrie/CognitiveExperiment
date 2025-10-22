@@ -1,0 +1,41 @@
+id,word_id,ice,eng,answer,test_id,condition,knows_icelandic,youtube_usage
+b507f20a,1,fjall,mountain,,,,Yes,0-15 minutes
+b507f20a,2,eldur,fire,,,,Yes,0-15 minutes
+b507f20a,3,gleði,joy,,,,Yes,0-15 minutes
+b507f20a,4,draumur,dream,ty,1.0,P,Yes,0-15 minutes
+b507f20a,5,hljóð,sound,,,,Yes,0-15 minutes
+b507f20a,6,vor,spring,tr,0.0,N,Yes,0-15 minutes
+b507f20a,7,haust,autumn,,,,Yes,0-15 minutes
+b507f20a,8,tungl,moon,uuyi,1.0,P,Yes,0-15 minutes
+b507f20a,9,haf,sea,,,,Yes,0-15 minutes
+b507f20a,10,ást,love,,,,Yes,0-15 minutes
+b507f20a,11,friður,peace,,,,Yes,0-15 minutes
+b507f20a,12,reiði,anger,,,,Yes,0-15 minutes
+b507f20a,13,synda,swim,,,,Yes,0-15 minutes
+b507f20a,14,vinna,work,uyu,0.0,N,Yes,0-15 minutes
+b507f20a,15,hlæja,laugh,er,0.0,N,Yes,0-15 minutes
+b507f20a,16,gráta,cry,,,,Yes,0-15 minutes
+b507f20a,17,borða,eat,,,,Yes,0-15 minutes
+b507f20a,18,hlaupa,run,,,,Yes,0-15 minutes
+b507f20a,19,ganga,walk,,,,Yes,0-15 minutes
+b507f20a,20,sjá,see,,,,Yes,0-15 minutes
+b507f20a,21,heyra,hear,utyu,1.0,P,Yes,0-15 minutes
+b507f20a,22,hugsa,think,yu,1.0,P,Yes,0-15 minutes
+b507f20a,23,vita,know,,,,Yes,0-15 minutes
+b507f20a,24,framkvæmt,implementation,,,,Yes,0-15 minutes
+b507f20a,25,forystumaður,leader,,,,Yes,0-15 minutes
+b507f20a,26,borg,city,,,,Yes,0-15 minutes
+b507f20a,27,hurð,door,,,,Yes,0-15 minutes
+b507f20a,28,gluggi,window,ut,1.0,P,Yes,0-15 minutes
+b507f20a,29,mynd,picture,gfbf,0.0,N,Yes,0-15 minutes
+b507f20a,30,þögn,silence,,,,Yes,0-15 minutes
+b507f20a,31,heppinn,lucky,tyu,1.0,P,Yes,0-15 minutes
+b507f20a,32,safn,museum ,,,,Yes,0-15 minutes
+b507f20a,33,ferð,trip ,,,,Yes,0-15 minutes
+b507f20a,34,rödd,voice,yt,0.0,N,Yes,0-15 minutes
+b507f20a,35,sársauki,pain,,,,Yes,0-15 minutes
+b507f20a,36,hreyfa,move,,,,Yes,0-15 minutes
+b507f20a,37,fjöldi,number ,,,,Yes,0-15 minutes
+b507f20a,38,verkefni,project ,,,,Yes,0-15 minutes
+b507f20a,39,árangur,success,,,,Yes,0-15 minutes
+b507f20a,40,skap,mood ,,,,Yes,0-15 minutes
