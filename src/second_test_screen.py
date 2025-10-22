@@ -283,7 +283,7 @@ class SecondTestScreen:
         self.update_timer()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file in answ_2 column using word_id"""
+        """Save the answers to the CSV file in answ_1 column using word_id, and a 0 or 1 flag in answ"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -312,8 +312,9 @@ class SecondTestScreen:
                     matching_rows = df[df['word_id'] == word_id]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
-                        df.loc[row_index, 'answ_2'] = answer
-                        print(f"  Saved answer for word_id {word_id}: '{answer}'")
+                        df.loc[row_index, 'answ_1'] = answer  # Store answer in answ_1
+                        df.loc[row_index, 'answ_2'] = int(1)  # Flag as second test (1)
+                        print(f"  Saved answer for word_id {word_id}: '{answer}' (second test)")
                     else:
                         print(f"  WARNING: No matching row found for word_id {word_id}")
 
