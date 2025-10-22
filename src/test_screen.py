@@ -301,7 +301,7 @@ class TestScreen:
     def save_answers_to_csv(self):
         """Save the answers to the CSV file in answ_1 column using word_id"""
         try:
-            data_dir = "../data"
+            data_dir = "data"
             if not os.path.exists(data_dir):
                 print("Data directory not found")
                 return

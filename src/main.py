@@ -66,8 +66,7 @@ class ExperimentApp:
     def load_word_data(self):
         """Load word data from Excel file"""
         try:
-            
-            df = pd.read_excel("word_pairs/Icelandic_English_Danish_words.xlsx")
+            df = pd.read_excel('word_pairs/Icelandic_English_Danish_words.xlsx')
             print(f"Excel file loaded successfully! Shape: {df.shape}")
             print(f"Columns: {df.columns.tolist()}")
 
@@ -182,10 +181,10 @@ class ExperimentApp:
         """Create CSV file with unique name and populate with data"""
         # Create unique filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"../data/experiment_{self.unique_id}_{timestamp}.csv"
+        filename = f"data/experiment_{self.unique_id}_{timestamp}.csv"
 
         # Ensure data directory exists
-        os.makedirs("../data", exist_ok=True)
+        os.makedirs("data", exist_ok=True)
 
         # Prepare data for CSV
         csv_data = []
@@ -274,14 +273,15 @@ class ExperimentApp:
 
         # Dummy text content
         dummy_text = """
-                Welcome to this cognitive science experiment.
+        Welcome to this cognitive science experiment.
         
         We are very grateful for your participation.
         This experiment consists of several parts, including memorization and recall tasks.
         First you will be presented with a list of 25 word pairs to memorize in 4 minutes.
+        Then you will use your personal YouTube account to watch YouTube short videos for 8 minutes.
         After a set period of time, you will be tested for 3 minutes on your memory of these word pairs.
-        Then you will watch YouTube short for 8 minutes.
-        After you have watched YouTube short, you will be presented with another list of 25 word pairs to memorize in 4 minutes.
+        You will then be presented with another list of 25 word pairs to memorize in 4 minutes.
+        Then watch YouTube short videos for another 8 minutes.
         Finally, you will be tested again on your memory of the 25 new word pairs for 3 minutes.
         Your responses will be recorded in a text file for analysis.
         
@@ -429,7 +429,7 @@ class ExperimentApp:
             text="08:00",
             font=("Arial", 20, "bold"),
             bg='lightgray',
-            fg='red'
+            fg='red'  # Red color
         )
         self.timer_display.pack()
 
@@ -575,17 +575,13 @@ class ExperimentApp:
 
             if hasattr(self, 'timer_display'):
                 self.timer_display.config(text=time_text)
-
-                # Change color when time is running low
-                if self.time_remaining <= 60:  # Last minute
-                    self.timer_display.config(fg='red')
-                elif self.time_remaining <= 180:  # Last 3 minutes
-                    self.timer_display.config(fg='orange')
+                # Keep red color throughout
+                self.timer_display.config(fg='red')
 
             self.time_remaining -= 1
 
-            # Schedule next update in 1 second
-            self.root.after(1000, self.update_first_timer)
+            # Schedule next update in 1 second and store the timer ID
+            self.first_timer_id = self.root.after(1000, self.update_first_timer)
         else:
             # Time's up!
             if hasattr(self, 'timer_display'):
@@ -595,7 +591,124 @@ class ExperimentApp:
     def on_first_timer_finished(self):
         """Handle when the FIRST countdown timer reaches zero"""
         print("First memorization time finished!")
-        # Use the TestScreen module with first phase words
+        # Show first break screen after first memorization
+        self.show_first_break_screen()
+
+    def on_first_test_completed(self, answers):
+        """Handle FIRST test completion"""
+        print(f"First test completed with {len(answers)} answers")
+        # After first test, show second memorizing screen
+        self.show_second_memorizing_screen()
+
+    def show_first_break_screen(self):
+        """Display the first 8-minute break screen after first test"""
+        # Cancel the first memorization timer to prevent interference
+        if hasattr(self, 'first_timer_id'):
+            try:
+                self.root.after_cancel(self.first_timer_id)
+            except:
+                pass
+
+        if hasattr(self, 'time_remaining'):
+            self.time_remaining = 0  # Stop the timer from continuing
+
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main frame
+        main_frame = tk.Frame(self.root, bg='white')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Title
+        title_label = tk.Label(
+            main_frame,
+            text="Break Time - 8 Minutes",
+            font=("Arial", 32, "bold"),
+            bg='white',
+            fg='black'
+        )
+        title_label.pack(pady=(0, 20))
+
+        # Countdown timer display
+        self.timer_display = tk.Label(
+            main_frame,
+            text="08:00",
+            font=("Arial", 48, "bold"),
+            bg='white',
+            fg='red'  # Red color
+        )
+        self.timer_display.pack(pady=20)
+
+        # Instructions
+        instruction_text = tk.Label(
+            main_frame,
+            text="Please open the YouTube app on your phone."
+                 "\nMake sure you are logged in to you personal account." 
+                 "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
+                 "\nThe next memorization session will begin automatically when the timer expires.",
+
+
+            font=("Arial", 14),
+            bg='white',
+            fg='black',
+            justify=tk.CENTER
+        )
+        instruction_text.pack(pady=20)
+
+        # Skip button for testing
+        next_button = tk.Button(
+            main_frame,
+            text="Skip Break (Testing)",
+            font=("Arial", 12),
+            bg='orange',
+            fg='white',
+            command=self.on_first_break_finished,
+            width=20,
+            height=2
+        )
+        next_button.pack(pady=10)
+
+        # Start the 8-minute break timer
+        self.break_time_remaining = 8 * 60
+        self.update_first_break_timer()
+
+    def update_first_break_timer(self):
+        """Update the first break timer display"""
+        if hasattr(self, 'break_time_remaining') and self.break_time_remaining > 0:
+            minutes = self.break_time_remaining // 60
+            seconds = self.break_time_remaining % 60
+            time_text = f"{minutes:02d}:{seconds:02d}"
+
+            # Color changes based on time remaining
+            if self.break_time_remaining <= 60:
+                color = 'red'
+            elif self.break_time_remaining <= 180:
+                color = 'orange'
+            else:
+                color = 'blue'
+
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text=time_text, fg=color)
+
+            self.break_time_remaining -= 1
+            self.break_timer_id = self.root.after(1000, self.update_first_break_timer)
+        else:
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text="00:00", fg='red')
+            self.on_first_break_finished()
+
+    def on_first_break_finished(self):
+        """Handle when first break finishes"""
+        # Cancel the break timer to prevent interference
+        if hasattr(self, 'break_timer_id'):
+            try:
+                self.root.after_cancel(self.break_timer_id)
+            except:
+                pass
+
+        print("First break finished! Starting first test...")
+        # After first break, show first test screen
         self.test_screen = TestScreen(
             root=self.root,
             word_data=self.first_phase_words,
@@ -603,14 +716,16 @@ class ExperimentApp:
             completion_callback=self.on_first_test_completed
         )
 
-    def on_first_test_completed(self, answers):
-        """Handle FIRST test completion"""
-        print(f"First test completed with {len(answers)} answers")
-        # Show break screen
-        self.show_break_screen()
-
     def start_second_countdown_timer(self):
         """Start the 4-minute countdown timer for SECOND memorization"""
+        # Cancel any existing timer callbacks to prevent conflicts
+        if hasattr(self, 'second_timer_id'):
+            try:
+                self.root.after_cancel(self.second_timer_id)
+            except:
+                pass
+
+        # Reset the timer to 4 minutes
         self.time_remaining_2 = 4 * 60  # 4 minutes in seconds
         self.update_second_timer()
 
@@ -623,17 +738,13 @@ class ExperimentApp:
 
             if hasattr(self, 'timer_display'):
                 self.timer_display.config(text=time_text)
-
-                # Change color when time is running low
-                if self.time_remaining_2 <= 60:  # Last minute
-                    self.timer_display.config(fg='red')
-                elif self.time_remaining_2 <= 180:  # Last 3 minutes
-                    self.timer_display.config(fg='orange')
+                # Keep red color throughout
+                self.timer_display.config(fg='red')
 
             self.time_remaining_2 -= 1
 
-            # Schedule next update in 1 second
-            self.root.after(1000, self.update_second_timer)
+            # Schedule next update in 1 second and store the timer ID
+            self.second_timer_id = self.root.after(1000, self.update_second_timer)
         else:
             # Time's up!
             if hasattr(self, 'timer_display'):
@@ -643,7 +754,112 @@ class ExperimentApp:
     def on_second_timer_finished(self):
         """Handle when the SECOND countdown timer reaches zero"""
         print("Second memorization time finished!")
-        # Use the SecondTestScreen module with second phase words
+        # Show second break screen after second memorization
+        self.show_second_break_screen()
+
+    def show_second_break_screen(self):
+        """Display the second 8-minute break screen after second memorization"""
+        # Cancel the second memorization timer to prevent interference
+        if hasattr(self, 'second_timer_id'):
+            try:
+                self.root.after_cancel(self.second_timer_id)
+            except:
+                pass
+
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main frame
+        main_frame = tk.Frame(self.root, bg='white')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Title
+        title_label = tk.Label(
+            main_frame,
+            text="Break Time - 8 Minutes",
+            font=("Arial", 32, "bold"),
+            bg='white',
+            fg='black'
+        )
+        title_label.pack(pady=(0, 20))
+
+        # Countdown timer display
+        self.timer_display = tk.Label(
+            main_frame,
+            text="08:00",
+            font=("Arial", 48, "bold"),
+            bg='white',
+            fg='red'
+        )
+        self.timer_display.pack(pady=20)
+
+        # Instructions
+        instruction_text = tk.Label(
+            main_frame,
+            text="Please open the YouTube app on your phone."
+                 "\nMake sure you are logged in to you personal account."
+                 "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
+                 "\nThe next memorization session will begin automatically when the timer expires.",            font=("Arial", 14),
+            bg='white',
+            fg='black',
+            justify=tk.CENTER
+        )
+        instruction_text.pack(pady=20)
+
+        # Skip button for testing
+        next_button = tk.Button(
+            main_frame,
+            text="Skip Break (Testing)",
+            font=("Arial", 12),
+            bg='orange',
+            fg='white',
+            command=self.on_second_break_finished,
+            width=20,
+            height=2
+        )
+        next_button.pack(pady=10)
+
+        # Start the 8-minute break timer
+        self.second_break_time_remaining = 8 * 60
+        self.update_second_break_timer()
+
+    def update_second_break_timer(self):
+        """Update the second break timer display"""
+        if hasattr(self, 'second_break_time_remaining') and self.second_break_time_remaining > 0:
+            minutes = self.second_break_time_remaining // 60
+            seconds = self.second_break_time_remaining % 60
+            time_text = f"{minutes:02d}:{seconds:02d}"
+
+            # Color changes based on time remaining
+            if self.second_break_time_remaining <= 60:
+                color = 'red'
+            elif self.second_break_time_remaining <= 180:
+                color = 'orange'
+            else:
+                color = 'blue'
+
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text=time_text, fg=color)
+
+            self.second_break_time_remaining -= 1
+            self.second_break_timer_id = self.root.after(1000, self.update_second_break_timer)
+        else:
+            if hasattr(self, 'timer_display'):
+                self.timer_display.config(text="00:00", fg='red')
+            self.on_second_break_finished()
+
+    def on_second_break_finished(self):
+        """Handle when second break finishes"""
+        # Cancel the break timer to prevent interference
+        if hasattr(self, 'second_break_timer_id'):
+            try:
+                self.root.after_cancel(self.second_break_timer_id)
+            except:
+                pass
+
+        print("Second break finished! Starting second test...")
+        # After second break, show second test screen
         self.second_test_screen = SecondTestScreen(
             root=self.root,
             word_data=self.second_phase_words,
@@ -848,7 +1064,7 @@ class ExperimentApp:
     def calculate_results(self):
         """Calculate results from the CSV file"""
         try:
-            data_dir = "../data"
+            data_dir = "data"
             if not os.path.exists(data_dir):
                 print("Data directory not found")
                 return None
@@ -1037,6 +1253,23 @@ class ExperimentApp:
 
     def show_second_memorizing_screen(self):
         """Display the second memorizing screen with word pairs before the second test"""
+        # Cancel any existing timers to prevent conflicts
+        if hasattr(self, 'break_timer_id'):
+            try:
+                self.root.after_cancel(self.break_timer_id)
+            except:
+                pass
+        if hasattr(self, 'timer_id'):
+            try:
+                self.root.after_cancel(self.timer_id)
+            except:
+                pass
+        if hasattr(self, 'first_timer_id'):
+            try:
+                self.root.after_cancel(self.first_timer_id)
+            except:
+                pass
+
         # Clear the root window
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -1167,7 +1400,7 @@ class ExperimentApp:
 
         self.timer_display = tk.Label(
             timer_frame,
-            text="08:00",
+            text="04:00",  # Changed from "08:00" to "04:00"
             font=("Arial", 20, "bold"),
             bg='lightgray',
             fg='red'
