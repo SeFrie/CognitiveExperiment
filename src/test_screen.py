@@ -5,7 +5,7 @@ import random
 
 
 class TestScreen:
-    def __init__(self, root, word_data, unique_id, completion_callback=None):
+    def __init__(self, root, word_data, unique_id, personalization_flag=None, completion_callback=None):
         """
         Initialize the test screen
 
@@ -13,11 +13,13 @@ class TestScreen:
             root: The tkinter root window
             word_data: DataFrame with word pairs
             unique_id: Unique session identifier
+            personalization_flag: True for Personalized, False for Non-personalized
             completion_callback: Function to call when test is completed
         """
         self.root = root
         self.word_data = word_data
         self.unique_id = unique_id
+        self.personalization_flag = personalization_flag
         self.completion_callback = completion_callback
 
         # Create randomized question order
@@ -299,7 +301,7 @@ class TestScreen:
             self.display_current_question()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file in answ_1 column using word_id"""
+        """Save the answers to the CSV file in answ_1 column with answ_2=0 and condition based on personalization"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -317,19 +319,24 @@ class TestScreen:
                 # Ensure word_id columns are the same type (int)
                 df['word_id'] = df['word_id'].astype(int)
 
-                print(f"Saving {len(self.answers)} answers to CSV...")
+                print(f"Saving {len(self.answers)} answers to CSV (Test 1)...")
 
-                # Update the answ_1 column with answers using word_id matching
+                # Determine condition for first test based on personalization flag
+                # Personalized=True: Test 1 gets 'P', Test 2 gets 'N'
+                # Personalized=False: Test 1 gets 'N', Test 2 gets 'P'
+                first_test_condition = 'P' if self.personalization_flag else 'N'
+
+                # Update answ_1, answ_2 (0 for first test), and condition
                 for word_id, answer in self.answers.items():
-                    # Ensure word_id is int for matching
                     word_id = int(word_id)
 
-                    # Find the row with matching word_id
                     matching_rows = df[df['word_id'] == word_id]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
                         df.loc[row_index, 'answ_1'] = answer
-                        print(f"  Saved answer for word_id {word_id}: '{answer}'")
+                        df.loc[row_index, 'answ_2'] = 0  # Test 1 = 0
+                        df.loc[row_index, 'condition'] = first_test_condition
+                        print(f"  Saved word_id {word_id}: '{answer}' (Test 1, answ_2=0, condition={first_test_condition})")
                     else:
                         print(f"  WARNING: No matching row found for word_id {word_id}")
 

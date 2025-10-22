@@ -1,0 +1,41 @@
+id,word_id,ice,eng,answ_1,answ_2,condition
+552be0eb,1,fjall,mountain,n,1,P
+552be0eb,2,eldur,fire,p,1,P
+552be0eb,3,gleði,joy,n,1,P
+552be0eb,4,draumur,dream,p,1,P
+552be0eb,5,hljóð,sound,n,1,P
+552be0eb,6,vor,spring,n,1,P
+552be0eb,7,haust,autumn,n,1,P
+552be0eb,8,tungl,moon,n,1,P
+552be0eb,9,haf,sea,p,1,P
+552be0eb,10,ást,love,p,1,P
+552be0eb,11,friður,peace,n,1,P
+552be0eb,12,reiði,anger,p,1,P
+552be0eb,13,synda,swim,n,1,P
+552be0eb,14,vinna,work,n,1,P
+552be0eb,15,hlæja,laugh,p,1,P
+552be0eb,16,gráta,cry,p,1,P
+552be0eb,17,borða,eat,p,1,P
+552be0eb,18,hlaupa,run,n,1,P
+552be0eb,19,ganga,walk,n,1,P
+552be0eb,20,sjá,see,n,1,P
+552be0eb,21,heyra,hear,n,1,P
+552be0eb,22,hugsa,think,p,1,P
+552be0eb,23,vita,know,n,1,P
+552be0eb,24,framkvæmt,implementation,n,1,P
+552be0eb,25,forystumaður,leader,n,1,P
+552be0eb,26,borg,city,n,1,P
+552be0eb,27,hurð,door,n,1,P
+552be0eb,28,gluggi,window,n,1,P
+552be0eb,29,mynd,picture,p,1,P
+552be0eb,30,þögn,silence,p,1,P
+552be0eb,31,heppinn,lucky,p,1,P
+552be0eb,32,safn,museum ,n,1,P
+552be0eb,33,ferð,trip ,p,1,P
+552be0eb,34,rödd,voice,p,1,P
+552be0eb,35,sársauki,pain,p,1,P
+552be0eb,36,hreyfa,move,p,1,P
+552be0eb,37,fjöldi,number ,p,1,P
+552be0eb,38,verkefni,project ,p,1,P
+552be0eb,39,árangur,success,p,1,P
+552be0eb,40,skap,mood ,p,1,P

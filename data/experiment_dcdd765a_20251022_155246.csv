@@ -1,0 +1,41 @@
+id,word_id,ice,eng,answ_1,answ_2,condition
+dcdd765a,1,fjall,mountain,p,0.0,P
+dcdd765a,2,eldur,fire,p,0.0,P
+dcdd765a,3,gleði,joy,n,1.0,N
+dcdd765a,4,draumur,dream,p,0.0,P
+dcdd765a,5,hljóð,sound,p,0.0,P
+dcdd765a,6,vor,spring,n,1.0,N
+dcdd765a,7,haust,autumn,n,1.0,N
+dcdd765a,8,tungl,moon,n,1.0,N
+dcdd765a,9,haf,sea,n,1.0,N
+dcdd765a,10,ást,love,p,0.0,P
+dcdd765a,11,friður,peace,p,0.0,P
+dcdd765a,12,reiði,anger,p,0.0,P
+dcdd765a,13,synda,swim,n,1.0,N
+dcdd765a,14,vinna,work,p,0.0,P
+dcdd765a,15,hlæja,laugh,nn,1.0,N
+dcdd765a,16,gráta,cry,n,1.0,N
+dcdd765a,17,borða,eat,n,1.0,N
+dcdd765a,18,hlaupa,run,n,1.0,N
+dcdd765a,19,ganga,walk,p,0.0,P
+dcdd765a,20,sjá,see,p,0.0,P
+dcdd765a,21,heyra,hear,p,0.0,P
+dcdd765a,22,hugsa,think,p,0.0,P
+dcdd765a,23,vita,know,p,0.0,P
+dcdd765a,24,framkvæmt,implementation,n,1.0,N
+dcdd765a,25,forystumaður,leader,n,1.0,N
+dcdd765a,26,borg,city,n,1.0,N
+dcdd765a,27,hurð,door,p,0.0,P
+dcdd765a,28,gluggi,window,n,1.0,N
+dcdd765a,29,mynd,picture,n,1.0,N
+dcdd765a,30,þögn,silence,p,0.0,P
+dcdd765a,31,heppinn,lucky,n,1.0,N
+dcdd765a,32,safn,museum ,p,0.0,P
+dcdd765a,33,ferð,trip ,n,1.0,N
+dcdd765a,34,rödd,voice,n,1.0,N
+dcdd765a,35,sársauki,pain,p,0.0,P
+dcdd765a,36,hreyfa,move,n,1.0,N
+dcdd765a,37,fjöldi,number ,n,1.0,N
+dcdd765a,38,verkefni,project ,p,0.0,P
+dcdd765a,39,árangur,success,p,0.0,P
+dcdd765a,40,skap,mood ,p,0.0,P

@@ -69,7 +69,7 @@ class ExperimentApp:
     def load_word_data(self):
         """Load word data from Excel file"""
         try:
-            df = pd.read_excel('word_pairs/Icelandic_English_Danish_words.xlsx')
+            df = pd.read_excel('word_pairs/Icelandic-English-Danish_40Words.xlsx')
             print(f"Excel file loaded successfully! Shape: {df.shape}")
             print(f"Columns: {df.columns.tolist()}")
 
@@ -223,14 +223,16 @@ class ExperimentApp:
         # Prepare data for CSV
         csv_data = []
 
-        # Add header
-        csv_data.append(['id', 'word_id', 'ice', 'eng', 'answ_1', 'answ_2'])
+        # Add header with condition column
+        csv_data.append(['id', 'word_id', 'ice', 'eng', 'answ_1', 'answ_2', 'condition'])
 
-        # Determine answ_2 flag based on personalization choice
-        # 1 for Personalized, 0 for Non-personalized
-        answ_2_flag = 1 if self.personalization_flag else 0
+        # Initially set answ_2 to empty string (will be set by test screens)
+        # Initially set condition based on personalization choice (will be updated by test screens)
+        # Personalized: First test gets P, Second test gets N
+        # Non-personalized: First test gets N, Second test gets P
+        initial_condition = 'P' if self.personalization_flag else 'N'
 
-        # Add data rows
+        # Add data rows - leave answ_2 and condition empty initially
         for index, row in self.word_data.iterrows():
             csv_row = [
                 self.unique_id,  # unique id
@@ -238,9 +240,13 @@ class ExperimentApp:
                 row.get('ice', ''),  # Icelandic word
                 row.get('eng', ''),  # English word
                 '',  # answ_1 - empty for now
-                answ_2_flag   # answ_2 - flag based on personalization choice
+                '',  # answ_2 - will be set by test screens (0 or 1)
+                ''   # condition - will be set by test screens (P or N)
             ]
             csv_data.append(csv_row)
+
+        # Store the initial choice for test screens to use
+        self.csv_filename = filename
 
         # Write to CSV file
         try:
@@ -248,7 +254,9 @@ class ExperimentApp:
                 writer = csv.writer(csvfile)
                 writer.writerows(csv_data)
             print(f"CSV file created: {filename}")
-            print(f"Personalization flag set to: {answ_2_flag} ({'Personalized' if self.personalization_flag else 'Non-personalized'})")
+            print(f"Initial personalization choice: {'Personalized' if self.personalization_flag else 'Non-personalized'}")
+            print(f"Test 1 will use condition: {initial_condition}")
+            print(f"Test 2 will use condition: {'N' if initial_condition == 'P' else 'P'}")
         except Exception as e:
             print(f"Error creating CSV file: {e}")
 
@@ -748,10 +756,12 @@ class ExperimentApp:
 
         print("First break finished! Starting first test...")
         # After first break, show first test screen
+        # Pass personalization flag to test screen
         self.test_screen = TestScreen(
             root=self.root,
             word_data=self.first_phase_words,
             unique_id=self.unique_id,
+            personalization_flag=self.personalization_flag,
             completion_callback=self.on_first_test_completed
         )
 
@@ -899,10 +909,12 @@ class ExperimentApp:
 
         print("Second break finished! Starting second test...")
         # After second break, show second test screen
+        # Pass personalization flag to second test screen
         self.second_test_screen = SecondTestScreen(
             root=self.root,
             word_data=self.second_phase_words,
             unique_id=self.unique_id,
+            personalization_flag=self.personalization_flag,
             completion_callback=self.on_second_test_completed
         )
 
