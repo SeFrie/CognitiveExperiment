@@ -184,33 +184,42 @@ class ExperimentApp:
         )
         question_label.pack(pady=(0, 10))
 
-        # Buttons frame for Yes/No
+        # Radio buttons frame for Yes/No
         icelandic_buttons_frame = tk.Frame(icelandic_frame, bg='white')
         icelandic_buttons_frame.pack()
 
-        # Yes button
-        yes_button = tk.Button(
+        # Variable to store Icelandic knowledge choice
+        self.icelandic_var = tk.StringVar(value="")
+
+        # Yes radio button
+        yes_radio = tk.Radiobutton(
             icelandic_buttons_frame,
             text="Yes",
+            variable=self.icelandic_var,
+            value="Yes",
             font=("Arial", 14),
-            bg='lightgreen',
-            command=self.on_icelandic_yes_clicked,
-            width=15,
-            height=2
+            bg='white',
+            activebackground='lightgreen',
+            selectcolor='lightgreen',
+            command=self.on_icelandic_changed,
+            indicatoron=True
         )
-        yes_button.pack(side=tk.LEFT, padx=10)
+        yes_radio.pack(side=tk.LEFT, padx=20)
 
-        # No button
-        no_button = tk.Button(
+        # No radio button
+        no_radio = tk.Radiobutton(
             icelandic_buttons_frame,
             text="No",
+            variable=self.icelandic_var,
+            value="No",
             font=("Arial", 14),
-            bg='lightcoral',
-            command=self.on_icelandic_no_clicked,
-            width=15,
-            height=2
+            bg='white',
+            activebackground='lightcoral',
+            selectcolor='lightcoral',
+            command=self.on_icelandic_changed,
+            indicatoron=True
         )
-        no_button.pack(side=tk.LEFT, padx=10)
+        no_radio.pack(side=tk.LEFT, padx=20)
 
         # Personalization buttons frame
         personalization_frame = tk.Frame(main_frame, bg='white')
@@ -239,7 +248,6 @@ class ExperimentApp:
             height=2
         )
         non_personalized_button.pack(side=tk.RIGHT, padx=5)
-
         # YouTube usage rating frame
         youtube_frame = tk.Frame(main_frame, bg='white')
         youtube_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 10))
@@ -247,52 +255,74 @@ class ExperimentApp:
         # Question label
         youtube_label = tk.Label(
             youtube_frame,
-            text="How much time do you spend on YouTube Shorts?",
+            text="How much time do you spend on YouTube Shorts per day?",
             font=("Arial", 16, "bold"),
             bg='white',
             fg='black'
         )
         youtube_label.pack(pady=(0, 10))
 
-        # Buttons frame for time options
+        # Radio buttons frame for time options
         youtube_buttons_frame = tk.Frame(youtube_frame, bg='white')
         youtube_buttons_frame.pack()
 
-        # 0-15 min button
-        min_15_button = tk.Button(
+        # Variable to store YouTube usage choice
+        self.youtube_var = tk.StringVar(value="")
+
+        # 0-15 min radio button
+        min_15_radio = tk.Radiobutton(
             youtube_buttons_frame,
             text="0-15 minutes",
+            variable=self.youtube_var,
+            value="0-15 minutes",
             font=("Arial", 14),
-            bg='lightgreen',
-            command=lambda: self.on_youtube_usage_selected(1),
-            width=15,
-            height=2
+            bg='white',
+            activebackground='lightgreen',
+            selectcolor='lightgreen',
+            command=self.on_youtube_changed,
+            indicatoron=True
         )
-        min_15_button.pack(side=tk.LEFT, padx=10)
+        min_15_radio.pack(side=tk.LEFT, padx=15)
 
-        # 16-45 min button
-        min_45_button = tk.Button(
+        # 16-45 min radio button
+        min_45_radio = tk.Radiobutton(
             youtube_buttons_frame,
             text="16-45 minutes",
+            variable=self.youtube_var,
+            value="16-45 minutes",
             font=("Arial", 14),
-            bg='lightyellow',
-            command=lambda: self.on_youtube_usage_selected(2),
-            width=15,
-            height=2
+            bg='white',
+            activebackground='lightyellow',
+            selectcolor='lightyellow',
+            command=self.on_youtube_changed,
+            indicatoron=True
         )
-        min_45_button.pack(side=tk.LEFT, padx=10)
+        min_45_radio.pack(side=tk.LEFT, padx=15)
 
-        # More than 45 min button
-        more_45_button = tk.Button(
+        # More than 45 min radio button
+        more_45_radio = tk.Radiobutton(
             youtube_buttons_frame,
             text="More than 45 minutes",
+            variable=self.youtube_var,
+            value="More than 45 minutes",
             font=("Arial", 14),
-            bg='lightcoral',
-            command=lambda: self.on_youtube_usage_selected(3),
-            width=15,
-            height=2
+            bg='white',
+            activebackground='lightcoral',
+            selectcolor='lightcoral',
+            command=self.on_youtube_changed,
+            indicatoron=True
         )
-        more_45_button.pack(side=tk.LEFT, padx=10)
+        more_45_radio.pack(side=tk.LEFT, padx=15)
+
+    def on_icelandic_changed(self):
+        """Handle Icelandic knowledge radio button change"""
+        self.knows_icelandic = self.icelandic_var.get()
+        print(f"Icelandic knowledge: {self.knows_icelandic}")
+
+    def on_youtube_changed(self):
+        """Handle YouTube usage radio button change"""
+        self.youtube_usage = self.youtube_var.get()
+        print(f"YouTube usage: {self.youtube_usage}")
 
     def on_icelandic_yes_clicked(self):
         """Handle Icelandic Yes button click"""
