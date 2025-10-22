@@ -328,9 +328,8 @@ class TestScreen:
                     matching_rows = df[df['word_id'] == word_id]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
-                        df.loc[row_index, 'answ_1'] = answer  # Store answer in answ_1
-                        df.loc[row_index, 'answ_2'] = int(0)  # Flag as first test (0)
-                        print(f"  Saved answer for word_id {word_id}: '{answer}' (first test)")
+                        df.loc[row_index, 'answ_1'] = answer
+                        print(f"  Saved answer for word_id {word_id}: '{answer}'")
                     else:
                         print(f"  WARNING: No matching row found for word_id {word_id}")
 

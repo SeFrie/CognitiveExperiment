@@ -19,6 +19,9 @@ class ExperimentApp:
         # Generate unique ID for this session
         self.unique_id = str(uuid.uuid4())[:8]  # Short unique ID
 
+        # Initialize personalization flag (will be set based on button click)
+        self.personalization_flag = None
+
         # Load word data
         self.word_data = self.load_word_data()
 
@@ -66,7 +69,7 @@ class ExperimentApp:
     def load_word_data(self):
         """Load word data from Excel file"""
         try:
-            df = pd.read_excel('word_pairs/Icelandic-English-Danish_SHORT.xlsx')
+            df = pd.read_excel('word_pairs/Icelandic_English_Danish_words.xlsx')
             print(f"Excel file loaded successfully! Shape: {df.shape}")
             print(f"Columns: {df.columns.tolist()}")
 
@@ -151,17 +154,6 @@ class ExperimentApp:
         button_frame = tk.Frame(main_frame, bg='white')
         button_frame.pack(side=tk.TOP, fill=tk.X, padx=20, pady=20)
 
-        next_button = tk.Button(
-            button_frame,
-            text="Next",
-            font=("Arial", 14),
-            bg='lightblue',
-            command=self.on_next_clicked,
-            width=10,
-            height=2
-        )
-        next_button.pack(side=tk.RIGHT)
-
         # Welcome message
         welcome_label = tk.Label(
             main_frame,
@@ -171,6 +163,48 @@ class ExperimentApp:
             fg='black'
         )
         welcome_label.pack(expand=True)
+
+        # Personalization buttons frame
+        personalization_frame = tk.Frame(main_frame, bg='white')
+        personalization_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 20))
+
+        # Personalized button
+        personalized_button = tk.Button(
+            personalization_frame,
+            text="Personalized",
+            font=("Arial", 14),
+            bg='lightgreen',
+            command=self.on_personalized_clicked,
+            width=20,
+            height=2
+        )
+        personalized_button.pack(side=tk.LEFT, padx=5)
+
+        # Non-personalized button
+        non_personalized_button = tk.Button(
+            personalization_frame,
+            text="Non-Personalized",
+            font=("Arial", 14),
+            bg='lightcoral',
+            command=self.on_non_personalized_clicked,
+            width=20,
+            height=2
+        )
+        non_personalized_button.pack(side=tk.RIGHT, padx=5)
+
+    def on_personalized_clicked(self):
+        """Handle personalized button click"""
+        print("Personalized option selected")
+        self.personalization_flag = True  # Set flag for personalized
+        self.create_csv_file()  # Create CSV file
+        self.show_information_screen()  # Show information screen
+
+    def on_non_personalized_clicked(self):
+        """Handle non-personalized button click"""
+        print("Non-personalized option selected")
+        self.personalization_flag = False  # Set flag for non-personalized
+        self.create_csv_file()  # Create CSV file
+        self.show_information_screen()  # Show information screen
 
     def on_next_clicked(self):
         """Handle next button click - create CSV and show information screen"""
@@ -192,6 +226,10 @@ class ExperimentApp:
         # Add header
         csv_data.append(['id', 'word_id', 'ice', 'eng', 'answ_1', 'answ_2'])
 
+        # Determine answ_2 flag based on personalization choice
+        # 1 for Personalized, 0 for Non-personalized
+        answ_2_flag = 1 if self.personalization_flag else 0
+
         # Add data rows
         for index, row in self.word_data.iterrows():
             csv_row = [
@@ -200,7 +238,7 @@ class ExperimentApp:
                 row.get('ice', ''),  # Icelandic word
                 row.get('eng', ''),  # English word
                 '',  # answ_1 - empty for now
-                ''   # answ_2 - empty for now
+                answ_2_flag   # answ_2 - flag based on personalization choice
             ]
             csv_data.append(csv_row)
 
@@ -210,6 +248,7 @@ class ExperimentApp:
                 writer = csv.writer(csvfile)
                 writer.writerows(csv_data)
             print(f"CSV file created: {filename}")
+            print(f"Personalization flag set to: {answ_2_flag} ({'Personalized' if self.personalization_flag else 'Non-personalized'})")
         except Exception as e:
             print(f"Error creating CSV file: {e}")
 
@@ -610,7 +649,7 @@ class ExperimentApp:
                 pass
 
         if hasattr(self, 'time_remaining'):
-            self.time_remaining = 0  # Stop the timer from continuing
+            self.time_remaining = 0 # Stop the timer from continuing
 
         # Clear the root window
         for widget in self.root.winfo_children():
