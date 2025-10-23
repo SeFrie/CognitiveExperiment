@@ -979,6 +979,21 @@ class ExperimentApp:
         )
         instruction_text.pack(pady=30)
 
+        # Skip button
+        skip_button = tk.Button(
+            main_frame,
+            text="Skip",
+            command=self.skip_first_get_ready,
+            font=("Arial", 16),
+            bg='lightblue',
+            fg='black',
+            width=15,
+            height=2,
+            relief=tk.RAISED,
+            bd=3
+        )
+        skip_button.pack(pady=20)
+
         # Start the 20-second countdown timer
         self.get_ready_time_remaining = 20
         self.update_first_get_ready_timer()
@@ -1023,6 +1038,19 @@ class ExperimentApp:
             personalization_flag=self.personalization_flag,
             completion_callback=self.on_first_test_completed
         )
+
+    def skip_first_get_ready(self):
+        """Skip the first get ready countdown and start test immediately"""
+        # Cancel the timer
+        if hasattr(self, 'get_ready_timer_id'):
+            try:
+                self.root.after_cancel(self.get_ready_timer_id)
+            except:
+                pass
+        
+        # Reset the time remaining to trigger the finished callback
+        self.get_ready_time_remaining = 0
+        self.on_first_get_ready_finished()
 
     def start_second_countdown_timer(self):
         """Start the 4-minute countdown timer for SECOND memorization"""
@@ -1211,6 +1239,21 @@ class ExperimentApp:
         )
         instruction_text.pack(pady=30)
 
+        # Skip button
+        skip_button = tk.Button(
+            main_frame,
+            text="Skip",
+            command=self.skip_second_get_ready,
+            font=("Arial", 16),
+            bg='lightblue',
+            fg='black',
+            width=15,
+            height=2,
+            relief=tk.RAISED,
+            bd=3
+        )
+        skip_button.pack(pady=20)
+
         # Start the 20-second countdown timer
         self.get_ready_time_remaining_2 = 20
         self.update_second_get_ready_timer()
@@ -1256,6 +1299,19 @@ class ExperimentApp:
             completion_callback=self.on_second_test_completed
         )
 
+    def skip_second_get_ready(self):
+        """Skip the second get ready countdown and start test immediately"""
+        # Cancel the timer
+        if hasattr(self, 'get_ready_timer_id_2'):
+            try:
+                self.root.after_cancel(self.get_ready_timer_id_2)
+            except:
+                pass
+        
+        # Reset the time remaining to trigger the finished callback
+        self.get_ready_time_remaining_2 = 0
+        self.on_second_get_ready_finished()
+
     def on_second_test_completed(self, answers):
         """Handle SECOND test completion"""
         print(f"Second test completed with {len(answers)} answers")
@@ -1285,28 +1341,16 @@ class ExperimentApp:
         )
         title_label.pack(pady=(0, 20))
 
-        # Results container with scrollbar
-        results_frame = tk.Frame(main_frame, bg='white')
-        results_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Create canvas with scrollbar
-        canvas = tk.Canvas(results_frame, bg='white')
-        scrollbar = ttk.Scrollbar(results_frame, orient=tk.VERTICAL, command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # Create main content container with left sidebar and center content
+        content_container = tk.Frame(main_frame, bg='white')
+        content_container.pack(fill=tk.BOTH, expand=True)
 
         # Display results
         if results:
-            # Summary Section
-            summary_frame = tk.Frame(scrollable_frame, bg='lightblue', relief=tk.RAISED, bd=2)
-            summary_frame.pack(fill=tk.X, padx=10, pady=10)
+            # Left sidebar for summary (fixed width)
+            summary_frame = tk.Frame(content_container, bg='lightblue', relief=tk.RAISED, bd=2, width=350)
+            summary_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10), pady=0)
+            summary_frame.pack_propagate(False)  # Maintain fixed width
 
             tk.Label(
                 summary_frame,
@@ -1317,104 +1361,227 @@ class ExperimentApp:
 
             # First Test Results
             first_test_frame = tk.Frame(summary_frame, bg='white', relief=tk.SOLID, bd=1)
-            first_test_frame.pack(fill=tk.X, padx=20, pady=5)
+            first_test_frame.pack(fill=tk.X, padx=10, pady=5)
 
             tk.Label(
                 first_test_frame,
-                text=f"First Test: {results['first_correct']}/{results['first_total']} correct ({results['first_percentage']:.1f}%)",
+                text="First Test:",
+                font=("Arial", 12, "bold"),
+                bg='white',
+                fg='darkgreen' if results['first_percentage'] >= 50 else 'darkred'
+            ).pack(pady=2)
+            
+            tk.Label(
+                first_test_frame,
+                text=f"{results['first_correct']} correct\n{results['first_incorrect']} incorrect\n{results['first_no_answer']} no answer",
+                font=("Arial", 11),
+                bg='white',
+                fg='black'
+            ).pack(pady=2)
+            
+            tk.Label(
+                first_test_frame,
+                text=f"{results['first_percentage']:.1f}%",
                 font=("Arial", 14, "bold"),
                 bg='white',
                 fg='darkgreen' if results['first_percentage'] >= 50 else 'darkred'
-            ).pack(pady=5)
+            ).pack(pady=2)
 
             # Second Test Results
             second_test_frame = tk.Frame(summary_frame, bg='white', relief=tk.SOLID, bd=1)
-            second_test_frame.pack(fill=tk.X, padx=20, pady=5)
+            second_test_frame.pack(fill=tk.X, padx=10, pady=5)
 
             tk.Label(
                 second_test_frame,
-                text=f"Second Test: {results['second_correct']}/{results['second_total']} correct ({results['second_percentage']:.1f}%)",
+                text="Second Test:",
+                font=("Arial", 12, "bold"),
+                bg='white',
+                fg='darkgreen' if results['second_percentage'] >= 50 else 'darkred'
+            ).pack(pady=2)
+            
+            tk.Label(
+                second_test_frame,
+                text=f"{results['second_correct']} correct\n{results['second_incorrect']} incorrect\n{results['second_no_answer']} no answer",
+                font=("Arial", 11),
+                bg='white',
+                fg='black'
+            ).pack(pady=2)
+            
+            tk.Label(
+                second_test_frame,
+                text=f"{results['second_percentage']:.1f}%",
                 font=("Arial", 14, "bold"),
                 bg='white',
                 fg='darkgreen' if results['second_percentage'] >= 50 else 'darkred'
-            ).pack(pady=5)
+            ).pack(pady=2)
 
             # Overall Results
             overall_frame = tk.Frame(summary_frame, bg='white', relief=tk.SOLID, bd=1)
-            overall_frame.pack(fill=tk.X, padx=20, pady=(5, 10))
+            overall_frame.pack(fill=tk.X, padx=10, pady=(5, 10))
 
             tk.Label(
                 overall_frame,
-                text=f"Overall: {results['total_correct']}/{results['total_answered']} correct ({results['overall_percentage']:.1f}%)",
+                text="Overall:",
+                font=("Arial", 14, "bold"),
+                bg='white',
+                fg='blue'
+            ).pack(pady=2)
+            
+            tk.Label(
+                overall_frame,
+                text=f"{results['total_correct']} correct\n{results['total_incorrect']} incorrect\n{results['total_no_answer']} no answer\n(out of {results['total_answered']})",
+                font=("Arial", 12),
+                bg='white',
+                fg='black'
+            ).pack(pady=2)
+            
+            tk.Label(
+                overall_frame,
+                text=f"{results['overall_percentage']:.1f}%",
                 font=("Arial", 16, "bold"),
                 bg='white',
                 fg='blue'
-            ).pack(pady=5)
+            ).pack(pady=2)
 
-            # Detailed Results Section
-            details_frame = tk.Frame(scrollable_frame, bg='lightgray', relief=tk.RAISED, bd=2)
-            details_frame.pack(fill=tk.X, padx=10, pady=10)
+            # Right side: Detailed Results with scrollbar
+            results_container = tk.Frame(content_container, bg='white')
+            results_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            # Create canvas with scrollbar for detailed results
+            canvas = tk.Canvas(results_container, bg='white')
+            scrollbar = ttk.Scrollbar(results_container, orient=tk.VERTICAL, command=canvas.yview)
+            scrollable_frame = tk.Frame(canvas, bg='white')
+
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+
+            # Detailed Results Section - Side by Side
+            details_frame = tk.Frame(scrollable_frame, bg='white')
+            details_frame.pack(pady=10, padx=20)
 
             tk.Label(
                 details_frame,
-                text="Detailed Results",
+                text="Detailed Results - All Answers",
                 font=("Arial", 16, "bold"),
-                bg='lightgray'
+                bg='white'
             ).pack(pady=10)
 
-            # First Test Details
+            # Create container for two columns
+            columns_container = tk.Frame(details_frame, bg='white')
+            columns_container.pack(pady=5)
+
+            # First Test Column (Left)
+            first_column = tk.Frame(columns_container, bg='white', relief=tk.SOLID, bd=1)
+            first_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+
+            tk.Label(
+                first_column,
+                text="First Test Answers",
+                font=("Arial", 12, "bold"),
+                bg='lightblue',
+                pady=5
+            ).pack(fill=tk.X)
+
+            # Display all first test details
             if results['first_details']:
-                first_details_frame = tk.Frame(details_frame, bg='white', relief=tk.SOLID, bd=1)
-                first_details_frame.pack(fill=tk.X, padx=10, pady=5)
-
-                tk.Label(
-                    first_details_frame,
-                    text="First Test Answers:",
-                    font=("Arial", 12, "bold"),
-                    bg='white'
-                ).pack(pady=5)
-
-                for detail in results['first_details'][:10]:  # Show first 10
-                    color = 'lightgreen' if detail['correct'] else 'lightcoral'
-                    status = '✓' if detail['correct'] else '✗'
+                for detail in results['first_details']:
+                    # Determine color and status based on answer
+                    if detail.get('is_empty', False):
+                        color = 'lightyellow'
+                        status = '○'
+                    elif detail['correct']:
+                        color = 'lightgreen'
+                        status = '✓'
+                    else:
+                        color = 'lightcoral'
+                        status = '✗'
+                    
+                    # Show answer and correct translation
+                    if detail['correct']:
+                        text = f"{status} {detail['ice']} → {detail['answer']}"
+                    elif detail.get('is_empty', False):
+                        text = f"{status} {detail['ice']}\n   Your answer: (no answer)\n   Correct: {detail['eng']}"
+                    else:
+                        text = f"{status} {detail['ice']}\n   Your answer: {detail['answer']}\n   Correct: {detail['eng']}"
 
                     detail_label = tk.Label(
-                        first_details_frame,
-                        text=f"{status} {detail['ice']} → {detail['answer']} (correct: {detail['eng']})",
-                        font=("Arial", 10),
+                        first_column,
+                        text=text,
+                        font=("Arial", 9),
                         bg=color,
                         anchor='w',
                         padx=10,
-                        pady=2
+                        pady=3,
+                        justify=tk.LEFT
                     )
-                    detail_label.pack(fill=tk.X, padx=5, pady=1)
+                    detail_label.pack(fill=tk.X, padx=2, pady=1)
+            else:
+                tk.Label(
+                    first_column,
+                    text="No answers recorded",
+                    font=("Arial", 10, "italic"),
+                    bg='white',
+                    fg='gray'
+                ).pack(pady=10)
 
-            # Second Test Details
+            # Second Test Column (Right)
+            second_column = tk.Frame(columns_container, bg='white', relief=tk.SOLID, bd=1)
+            second_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+
+            tk.Label(
+                second_column,
+                text="Second Test Answers",
+                font=("Arial", 12, "bold"),
+                bg='lightblue',
+                pady=5
+            ).pack(fill=tk.X)
+
+            # Display all second test details
             if results['second_details']:
-                second_details_frame = tk.Frame(details_frame, bg='white', relief=tk.SOLID, bd=1)
-                second_details_frame.pack(fill=tk.X, padx=10, pady=5)
-
-                tk.Label(
-                    second_details_frame,
-                    text="Second Test Answers:",
-                    font=("Arial", 12, "bold"),
-                    bg='white'
-                ).pack(pady=5)
-
-                for detail in results['second_details'][:10]:  # Show first 10
-                    color = 'lightgreen' if detail['correct'] else 'lightcoral'
-                    status = '✓' if detail['correct'] else '✗'
+                for detail in results['second_details']:
+                    # Determine color and status based on answer
+                    if detail.get('is_empty', False):
+                        color = 'lightyellow'
+                        status = '○'
+                    elif detail['correct']:
+                        color = 'lightgreen'
+                        status = '✓'
+                    else:
+                        color = 'lightcoral'
+                        status = '✗'
+                    
+                    # Show answer and correct translation
+                    if detail['correct']:
+                        text = f"{status} {detail['ice']} → {detail['answer']}"
+                    elif detail.get('is_empty', False):
+                        text = f"{status} {detail['ice']}\n   Your answer: (no answer)\n   Correct: {detail['eng']}"
+                    else:
+                        text = f"{status} {detail['ice']}\n   Your answer: {detail['answer']}\n   Correct: {detail['eng']}"
 
                     detail_label = tk.Label(
-                        second_details_frame,
-                        text=f"{status} {detail['ice']} → {detail['answer']} (correct: {detail['eng']})",
-                        font=("Arial", 10),
+                        second_column,
+                        text=text,
+                        font=("Arial", 9),
                         bg=color,
                         anchor='w',
                         padx=10,
-                        pady=2
+                        pady=3,
+                        justify=tk.LEFT
                     )
-                    detail_label.pack(fill=tk.X, padx=5, pady=1)
+                    detail_label.pack(fill=tk.X, padx=2, pady=1)
+            else:
+                tk.Label(
+                    second_column,
+                    text="No answers recorded",
+                    font=("Arial", 10, "italic"),
+                    bg='white',
+                    fg='gray'
+                ).pack(pady=10)
 
             # Data saved message
             tk.Label(
@@ -1425,18 +1592,19 @@ class ExperimentApp:
                 fg='gray'
             ).pack(pady=10)
 
+            canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
         else:
             # Error message if results couldn't be calculated
-            tk.Label(
-                scrollable_frame,
+            error_label = tk.Label(
+                content_container,
                 text="Error calculating results.\nPlease check the data file.",
                 font=("Arial", 16),
                 bg='white',
                 fg='red'
-            ).pack(pady=50)
-
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            )
+            error_label.pack(pady=50, expand=True)
 
         # Thank you message at bottom
         thank_you_frame = tk.Frame(main_frame, bg='white')
@@ -1476,45 +1644,129 @@ class ExperimentApp:
 
             # Initialize counters
             first_correct = 0
+            first_incorrect = 0
+            first_no_answer = 0
             first_answered = 0
             second_correct = 0
+            second_incorrect = 0
+            second_no_answer = 0
             second_answered = 0
+
+            # Create dictionaries to store answers by word_id for both tests
+            first_test_answers = {}  # word_id -> answer
+            second_test_answers = {}  # word_id -> answer
 
             first_details = []
             second_details = []
 
-            # Process each row
+            # Process each row from CSV and store answers by word_id
             for _, row in df.iterrows():
-                ice_word = str(row.get('ice', '')).strip().lower()
-                eng_word = str(row.get('eng', '')).strip().lower()
-                answer_1 = str(row.get('answer', '')).strip().lower()
-                answer_2 = str(row.get('test_id', '')).strip().lower()
+                answer_raw = row.get('answer', '')
+                
+                # Handle empty/null answers
+                if pd.isna(answer_raw) or answer_raw == '':
+                    answer = ''
+                    answer_display = '(no answer)'
+                else:
+                    answer = str(answer_raw).strip().lower()
+                    answer_display = str(answer_raw).strip()
+                
+                # Get word_id and test_id
+                word_id = row.get('word_id', '')
+                test_id_raw = row.get('test_id', '')
+                if pd.isna(test_id_raw):
+                    continue
+                test_id = str(int(float(test_id_raw))) if test_id_raw != '' else ''
 
-                # Check first test answer
-                if answer_1:
+                # Store the answer by word_id and test_id
+                if test_id == '0':
+                    first_test_answers[word_id] = {
+                        'answer': answer,
+                        'answer_display': answer_display,
+                        'ice': row.get('ice', ''),
+                        'eng': str(row.get('eng', '')).strip().lower()
+                    }
+                elif test_id == '1':
+                    second_test_answers[word_id] = {
+                        'answer': answer,
+                        'answer_display': answer_display,
+                        'ice': row.get('ice', ''),
+                        'eng': str(row.get('eng', '')).strip().lower()
+                    }
+
+            # Now process all words from first phase
+            for _, word_row in self.first_phase_words.iterrows():
+                word_id = word_row['word_id']
+                ice_word = word_row['ice']
+                eng_word = str(word_row['eng']).strip().lower()
+                
+                # Check if this word was answered in the CSV
+                if word_id in first_test_answers:
+                    answer_data = first_test_answers[word_id]
+                    answer = answer_data['answer']
+                    answer_display = answer_data['answer_display']
+                else:
+                    # Word was not answered at all
+                    answer = ''
+                    answer_display = '(no answer)'
+                
+                # Determine correctness
+                is_empty = (answer == '')
+                is_correct = (answer == eng_word and answer != '')
+                
+                if is_empty:
+                    first_no_answer += 1
+                elif is_correct:
+                    first_correct += 1
                     first_answered += 1
-                    is_correct = (answer_1 == eng_word)
-                    if is_correct:
-                        first_correct += 1
-                    first_details.append({
-                        'ice': row.get('ice', ''),
-                        'eng': row.get('eng', ''),
-                        'answer': row.get('answer', ''),
-                        'correct': is_correct
-                    })
+                else:
+                    first_incorrect += 1
+                    first_answered += 1
+                
+                first_details.append({
+                    'ice': ice_word,
+                    'eng': word_row['eng'],
+                    'answer': answer_display,
+                    'correct': is_correct,
+                    'is_empty': is_empty
+                })
 
-                # Check second test answer
-                if answer_2:
+            # Now process all words from second phase
+            for _, word_row in self.second_phase_words.iterrows():
+                word_id = word_row['word_id']
+                ice_word = word_row['ice']
+                eng_word = str(word_row['eng']).strip().lower()
+                
+                # Check if this word was answered in the CSV
+                if word_id in second_test_answers:
+                    answer_data = second_test_answers[word_id]
+                    answer = answer_data['answer']
+                    answer_display = answer_data['answer_display']
+                else:
+                    # Word was not answered at all
+                    answer = ''
+                    answer_display = '(no answer)'
+                
+                # Determine correctness
+                is_empty = (answer == '')
+                is_correct = (answer == eng_word and answer != '')
+                
+                if is_empty:
+                    second_no_answer += 1
+                elif is_correct:
+                    second_correct += 1
                     second_answered += 1
-                    is_correct = (answer_2 == eng_word)
-                    if is_correct:
-                        second_correct += 1
-                    second_details.append({
-                        'ice': row.get('ice', ''),
-                        'eng': row.get('eng', ''),
-                        'answer': row.get('test_id', ''),
-                        'correct': is_correct
-                    })
+                else:
+                    second_incorrect += 1
+                    second_answered += 1
+                
+                second_details.append({
+                    'ice': ice_word,
+                    'eng': word_row['eng'],
+                    'answer': answer_display,
+                    'correct': is_correct,
+                    'is_empty': is_empty
+                })
 
             # Fixed: Always use 25 as the total for each test (this is how many words are tested)
             first_total = 25
@@ -1524,17 +1776,24 @@ class ExperimentApp:
             first_percentage = (first_correct / first_total * 100) if first_total > 0 else 0
             second_percentage = (second_correct / second_total * 100) if second_total > 0 else 0
             total_correct = first_correct + second_correct
-            total_answered = first_answered + second_answered
+            total_incorrect = first_incorrect + second_incorrect
+            total_no_answer = first_no_answer + second_no_answer
             overall_percentage = (total_correct / 50 * 100)  # Out of 50 total (25+25)
 
             results = {
                 'first_correct': first_correct,
+                'first_incorrect': first_incorrect,
+                'first_no_answer': first_no_answer,
                 'first_total': first_total,
                 'first_percentage': first_percentage,
                 'second_correct': second_correct,
+                'second_incorrect': second_incorrect,
+                'second_no_answer': second_no_answer,
                 'second_total': second_total,
                 'second_percentage': second_percentage,
                 'total_correct': total_correct,
+                'total_incorrect': total_incorrect,
+                'total_no_answer': total_no_answer,
                 'total_answered': 50,  # Always 50 (25 + 25)
                 'overall_percentage': overall_percentage,
                 'first_details': first_details,
@@ -1542,9 +1801,9 @@ class ExperimentApp:
                 'csv_file': latest_csv
             }
 
-            print(f"Results calculated:")
-            print(f"  First Test: {first_correct}/{first_total} ({first_percentage:.1f}%)")
-            print(f"  Second Test: {second_correct}/{second_total} ({second_percentage:.1f}%)")
+            print("Results calculated:")
+            print(f"  First Test: {first_correct} correct, {first_incorrect} incorrect, {first_no_answer} no answer")
+            print(f"  Second Test: {second_correct} correct, {second_incorrect} incorrect, {second_no_answer} no answer")
             print(f"  Overall: {total_correct}/50 ({overall_percentage:.1f}%)")
 
             return results

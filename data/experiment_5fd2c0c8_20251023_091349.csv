@@ -1,0 +1,41 @@
+id,word_id,ice,eng,answer,test_id,condition,knows_icelandic,youtube_usage
+5fd2c0c8,1,fjall,mountain,mountain,0.0,N,No,0-15 minutes
+5fd2c0c8,2,eldur,fire,,,,No,0-15 minutes
+5fd2c0c8,3,gleði,joy,,,,No,0-15 minutes
+5fd2c0c8,4,draumur,dream,jhflsdf,0.0,N,No,0-15 minutes
+5fd2c0c8,5,hljóð,sound,sound,1.0,P,No,0-15 minutes
+5fd2c0c8,6,vor,spring,spring,0.0,N,No,0-15 minutes
+5fd2c0c8,7,haust,autumn,autumn,0.0,N,No,0-15 minutes
+5fd2c0c8,8,tungl,moon,moon,1.0,P,No,0-15 minutes
+5fd2c0c8,9,haf,sea,sea,0.0,N,No,0-15 minutes
+5fd2c0c8,10,ást,love,,,,No,0-15 minutes
+5fd2c0c8,11,friður,peace,freedom,0.0,N,No,0-15 minutes
+5fd2c0c8,12,reiði,anger,anger,1.0,P,No,0-15 minutes
+5fd2c0c8,13,synda,swim,Sunday,0.0,N,No,0-15 minutes
+5fd2c0c8,14,vinna,work,work,1.0,P,No,0-15 minutes
+5fd2c0c8,15,hlæja,laugh,help,0.0,N,No,0-15 minutes
+5fd2c0c8,16,gráta,cry,cry,0.0,N,No,0-15 minutes
+5fd2c0c8,17,borða,eat,eat,1.0,P,No,0-15 minutes
+5fd2c0c8,18,hlaupa,run,,,,No,0-15 minutes
+5fd2c0c8,19,ganga,walk,walk,1.0,P,No,0-15 minutes
+5fd2c0c8,20,sjá,see,,,,No,0-15 minutes
+5fd2c0c8,21,heyra,hear,hear,1.0,P,No,0-15 minutes
+5fd2c0c8,22,hugsa,think,ert,0.0,N,No,0-15 minutes
+5fd2c0c8,23,vita,know,,,,No,0-15 minutes
+5fd2c0c8,24,framkvæmt,implementation,,,,No,0-15 minutes
+5fd2c0c8,25,forystumaður,leader,,,,No,0-15 minutes
+5fd2c0c8,26,borg,city,city,0.0,N,No,0-15 minutes
+5fd2c0c8,27,hurð,door,vfd,0.0,N,No,0-15 minutes
+5fd2c0c8,28,gluggi,window,window,1.0,P,No,0-15 minutes
+5fd2c0c8,29,mynd,picture,picture,1.0,P,No,0-15 minutes
+5fd2c0c8,30,þögn,silence,,,,No,0-15 minutes
+5fd2c0c8,31,heppinn,lucky,help,0.0,N,No,0-15 minutes
+5fd2c0c8,32,safn,museum ,history,0.0,N,No,0-15 minutes
+5fd2c0c8,33,ferð,trip ,trip,1.0,P,No,0-15 minutes
+5fd2c0c8,34,rödd,voice,,,,No,0-15 minutes
+5fd2c0c8,35,sársauki,pain,rwerw,0.0,N,No,0-15 minutes
+5fd2c0c8,36,hreyfa,move,,,,No,0-15 minutes
+5fd2c0c8,37,fjöldi,number ,number,1.0,P,No,0-15 minutes
+5fd2c0c8,38,verkefni,project ,jkl,0.0,N,No,0-15 minutes
+5fd2c0c8,39,árangur,success,,,,No,0-15 minutes
+5fd2c0c8,40,skap,mood ,knife,0.0,N,No,0-15 minutes
