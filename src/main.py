@@ -225,29 +225,32 @@ class ExperimentApp:
         personalization_frame = tk.Frame(main_frame, bg='white')
         personalization_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 20))
 
-        # Personalized button
-        personalized_button = tk.Button(
+        # Personalized button (initially disabled)
+        self.personalized_button = tk.Button(
             personalization_frame,
             text="Personalized",
             font=("Arial", 14),
-            bg='lightgreen',
+            bg='lightgray',
             command=self.on_personalized_clicked,
             width=20,
-            height=2
+            height=2,
+            state=tk.DISABLED
         )
-        personalized_button.pack(side=tk.LEFT, padx=5)
+        self.personalized_button.pack(side=tk.LEFT, padx=5)
 
-        # Non-personalized button
-        non_personalized_button = tk.Button(
+        # Non-personalized button (initially disabled)
+        self.non_personalized_button = tk.Button(
             personalization_frame,
             text="Non-Personalized",
             font=("Arial", 14),
-            bg='lightcoral',
+            bg='lightgray',
             command=self.on_non_personalized_clicked,
             width=20,
-            height=2
+            height=2,
+            state=tk.DISABLED
         )
-        non_personalized_button.pack(side=tk.RIGHT, padx=5)
+        self.non_personalized_button.pack(side=tk.RIGHT, padx=5)
+
         # YouTube usage rating frame
         youtube_frame = tk.Frame(main_frame, bg='white')
         youtube_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(10, 10))
@@ -314,15 +317,31 @@ class ExperimentApp:
         )
         more_45_radio.pack(side=tk.LEFT, padx=15)
 
+    def check_and_enable_buttons(self):
+        """Check if both radio button groups have selections and enable personalization buttons"""
+        if self.icelandic_var.get() and self.youtube_var.get():
+            # Both selections made - enable the buttons with proper colors
+            self.personalized_button.config(state=tk.NORMAL, bg='lightgreen')
+            self.non_personalized_button.config(state=tk.NORMAL, bg='lightcoral')
+        else:
+            # Not both selected - keep buttons disabled
+            self.personalized_button.config(state=tk.DISABLED, bg='lightgray')
+            self.non_personalized_button.config(state=tk.DISABLED, bg='lightgray')
+
     def on_icelandic_changed(self):
         """Handle Icelandic knowledge radio button change"""
         self.knows_icelandic = self.icelandic_var.get()
         print(f"Icelandic knowledge: {self.knows_icelandic}")
+        # Check if we should enable the personalization buttons
+        self.check_and_enable_buttons()
 
     def on_youtube_changed(self):
         """Handle YouTube usage radio button change"""
         self.youtube_usage = self.youtube_var.get()
         print(f"YouTube usage: {self.youtube_usage}")
+        # Check if we should enable the personalization buttons
+        self.check_and_enable_buttons()
+
 
     def on_icelandic_yes_clicked(self):
         """Handle Icelandic Yes button click"""
