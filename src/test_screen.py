@@ -142,8 +142,8 @@ class TestScreen:
         finish_frame = tk.Frame(nav_frame, bg='white')
         finish_frame.pack(pady=(10, 0))
 
-        self.finish_test_button = tk.Button(finish_frame, text="Finish Test (Testing)",
-                                          font=("Arial", 12), bg='orange', fg='white',
+        self.finish_test_button = tk.Button(finish_frame, text="Finish Test",
+                                          font=("Arial", 12), bg='orange', fg='black',
                                           command=self.finish_test, width=20, height=2)
         self.finish_test_button.pack()
 
@@ -301,7 +301,7 @@ class TestScreen:
             self.display_current_question()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file in answ_1 column with answ_2=0 and condition based on personalization"""
+        """Save the answers to the CSV file for test_id=0 rows only, filling 'none' for unanswered questions"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -321,24 +321,27 @@ class TestScreen:
 
                 print(f"Saving {len(self.answers)} answers to CSV (Test 1)...")
 
-                # Determine condition for first test based on personalization flag
-                # Personalized=True: Test 1 gets 'P', Test 2 gets 'N'
-                # Personalized=False: Test 1 gets 'N', Test 2 gets 'P'
-                first_test_condition = 'P' if self.personalization_flag else 'N'
-
-                # Update answ_1, answ_2 (0 for first test), and condition
-                for word_id, answer in self.answers.items():
+                # Get all word_ids for this test from word_data
+                all_word_ids = set(self.word_data['word_id'].astype(int).tolist())
+                
+                # Update the answer field for all rows where test_id = 0
+                for word_id in all_word_ids:
                     word_id = int(word_id)
+                    
+                    # Get the answer if it exists, otherwise use "none"
+                    answer = self.answers.get(word_id, "none")
 
-                    matching_rows = df[df['word_id'] == word_id]
+                    # Find rows that match both word_id AND test_id = 0
+                    matching_rows = df[(df['word_id'] == word_id) & (df['test_id'] == 0)]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
                         df.loc[row_index, 'answer'] = answer
-                        df.loc[row_index, 'test_id'] = 0  # Test 1 = 0
-                        df.loc[row_index, 'condition'] = first_test_condition
-                        print(f"  Saved word_id {word_id}: '{answer}' (Test 1, test_id=0, condition={first_test_condition})")
+                        if answer == "none":
+                            print(f"  Saved word_id {word_id}: 'none' (unanswered)")
+                        else:
+                            print(f"  Saved word_id {word_id}: '{answer}' (Test 1, test_id=0)")
                     else:
-                        print(f"  WARNING: No matching row found for word_id {word_id}")
+                        print(f"  WARNING: No matching row found for word_id {word_id} with test_id=0")
 
                 df.to_csv(latest_csv, index=False)
                 print(f"✓ First test answers saved to {latest_csv}")

@@ -37,6 +37,26 @@ class ExperimentApp:
         # Show welcome screen
         self.show_welcome_screen()
 
+    def create_footer(self, parent_frame):
+        """Create a standard footer for all screens"""
+        footer_frame = tk.Frame(parent_frame, bg='#990000', height=40)
+        footer_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=0, pady=0)
+        footer_frame.pack_propagate(False)  # Maintain fixed height
+        
+        # Footer content text
+        footer_label = tk.Label(
+            footer_frame,
+            text="This experiment is conducted as part of a research study | Session ID: " + self.unique_id,
+            font=("Arial", 10),
+            bg='#990000',
+            fg='white'
+        )
+        footer_label.pack(pady=10)
+        
+        return footer_frame
+        
+        return footer_frame
+
     def select_random_word_sets(self):
         """Select two sets of 25 random words for the two experiment phases"""
         total_words = len(self.word_data)
@@ -156,6 +176,9 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True)
 
+        # Create footer
+        self.create_footer(main_frame)
+
         # Next button in upper right corner
         button_frame = tk.Frame(main_frame, bg='white')
         button_frame.pack(side=tk.TOP, fill=tk.X, padx=20, pady=20)
@@ -164,7 +187,7 @@ class ExperimentApp:
         welcome_label = tk.Label(
             main_frame,
             text="Welcome",
-            font=("Arial", 32, "bold"),
+            font=("Arial", 52, "bold"),
             bg='white',
             fg='black'
         )
@@ -178,7 +201,7 @@ class ExperimentApp:
         question_label = tk.Label(
             icelandic_frame,
             text="Do you know Icelandic?",
-            font=("Arial", 16, "bold"),
+            font=("Arial", 20, "bold"),
             bg='white',
             fg='black'
         )
@@ -197,7 +220,7 @@ class ExperimentApp:
             text="Yes",
             variable=self.icelandic_var,
             value="Yes",
-            font=("Arial", 14),
+            font=("Arial", 16),
             bg='white',
             activebackground='lightgreen',
             selectcolor='lightgreen',
@@ -212,7 +235,7 @@ class ExperimentApp:
             text="No",
             variable=self.icelandic_var,
             value="No",
-            font=("Arial", 14),
+            font=("Arial", 16),
             bg='white',
             activebackground='lightcoral',
             selectcolor='lightcoral',
@@ -259,7 +282,7 @@ class ExperimentApp:
         youtube_label = tk.Label(
             youtube_frame,
             text="How much time do you spend on YouTube Shorts per day?",
-            font=("Arial", 16, "bold"),
+            font=("Arial", 20, "bold"),
             bg='white',
             fg='black'
         )
@@ -278,7 +301,7 @@ class ExperimentApp:
             text="0-15 minutes",
             variable=self.youtube_var,
             value="0-15 minutes",
-            font=("Arial", 14),
+            font=("Arial", 16),
             bg='white',
             activebackground='lightgreen',
             selectcolor='lightgreen',
@@ -293,7 +316,7 @@ class ExperimentApp:
             text="16-45 minutes",
             variable=self.youtube_var,
             value="16-45 minutes",
-            font=("Arial", 14),
+            font=("Arial", 16),
             bg='white',
             activebackground='lightyellow',
             selectcolor='lightyellow',
@@ -308,7 +331,7 @@ class ExperimentApp:
             text="More than 45 minutes",
             variable=self.youtube_var,
             value="More than 45 minutes",
-            font=("Arial", 14),
+            font=("Arial", 16),
             bg='white',
             activebackground='lightcoral',
             selectcolor='lightcoral',
@@ -402,24 +425,39 @@ class ExperimentApp:
         # Add header with condition, knows_icelandic, and youtube_usage columns
         csv_data.append(['id', 'word_id', 'ice', 'eng', 'answer', 'test_id', 'condition', 'knows_icelandic', 'youtube_usage'])
 
-        # Initially set test_id to empty string (will be set by test screens)
-        # Initially set condition based on personalization choice (will be updated by test screens)
+        # Determine conditions based on personalization choice
         # Personalized: First test gets P, Second test gets N
         # Non-personalized: First test gets N, Second test gets P
-        initial_condition = 'P' if self.personalization_flag else 'N'
+        first_test_condition = 'P' if self.personalization_flag else 'N'
+        second_test_condition = 'N' if self.personalization_flag else 'P'
 
-        # Add data rows - leave test_id and condition empty initially
-        for index, row in self.word_data.iterrows():
+        # Add data rows for FIRST TEST (test_id = 0)
+        for index, row in self.first_phase_words.iterrows():
             csv_row = [
                 self.unique_id,  # unique id
-                int(row.get('word_id', index + 1)),  # word_id from Excel or index
+                int(row.get('word_id', index + 1)),  # word_id from Excel
                 row.get('ice', ''),  # Icelandic word
                 row.get('eng', ''),  # English word
-                '',  # answer - empty for now
-                '',  # test_id - will be set by test screens (0 or 1)
-                '',  # condition - will be set by test screens (P or N)
-                self.knows_icelandic if self.knows_icelandic else '',  # knows_icelandic - Yes or No
-                self.youtube_usage if self.youtube_usage else ''  # youtube_usage - time range
+                '',  # answer - empty for now, will be filled by test screen
+                0,  # test_id - 0 for first test
+                first_test_condition,  # condition for first test
+                self.knows_icelandic if self.knows_icelandic else '',  # knows_icelandic
+                self.youtube_usage if self.youtube_usage else ''  # youtube_usage
+            ]
+            csv_data.append(csv_row)
+
+        # Add data rows for SECOND TEST (test_id = 1)
+        for index, row in self.second_phase_words.iterrows():
+            csv_row = [
+                self.unique_id,  # unique id
+                int(row.get('word_id', index + 1)),  # word_id from Excel
+                row.get('ice', ''),  # Icelandic word
+                row.get('eng', ''),  # English word
+                '',  # answer - empty for now, will be filled by test screen
+                1,  # test_id - 1 for second test
+                second_test_condition,  # condition for second test
+                self.knows_icelandic if self.knows_icelandic else '',  # knows_icelandic
+                self.youtube_usage if self.youtube_usage else ''  # youtube_usage
             ]
             csv_data.append(csv_row)
 
@@ -435,8 +473,9 @@ class ExperimentApp:
             print(f"Initial personalization choice: {'Personalized' if self.personalization_flag else 'Non-personalized'}")
             print(f"Knows Icelandic: {self.knows_icelandic if self.knows_icelandic else 'Not specified'}")
             print(f"YouTube usage: {self.youtube_usage if self.youtube_usage else 'Not specified'}")
-            print(f"Test 1 will use condition: {initial_condition}")
-            print(f"Test 2 will use condition: {'N' if initial_condition == 'P' else 'P'}")
+            print(f"Test 1 will use condition: {first_test_condition}")
+            print(f"Test 2 will use condition: {second_test_condition}")
+            print(f"Total rows created: {len(csv_data) - 1} (25 for Test 1, 25 for Test 2)")
         except Exception as e:
             print(f"Error creating CSV file: {e}")
 
@@ -449,6 +488,9 @@ class ExperimentApp:
         # Create main frame
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+
+        # Create footer
+        self.create_footer(main_frame)
 
         # Top bar with title and Next button
         top_bar = tk.Frame(main_frame, bg='white')
@@ -483,7 +525,7 @@ class ExperimentApp:
         # Text widget with scrollbar
         text_widget = tk.Text(
             text_frame,
-            font=("Arial", 12),
+            font=("Arial", 24),
             bg='white',
             fg='black',
             wrap=tk.WORD,
@@ -497,15 +539,19 @@ class ExperimentApp:
         # Pack text widget and scrollbar
         text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        text_widget.tag_configure("left", justify='left')
+
 
         # Dummy text content
-        dummy_text = """
+        information_text = """
         Welcome to this cognitive science experiment.
         
         We are very grateful for your participation.
         This experiment consists of several parts, including memorization and recall tasks.
         First you will be presented with a list of 20 word pairs to memorize in 4 minutes.
         Then you will watch YouTube short videos for 8 minutes, the examiner will tell you on which account.
+        
         Afterwards, you will be tested for 3 minutes on your memory of these word pairs.
         You will then be presented with another list of 20 word pairs to memorize in 4 minutes.
         Then watch YouTube short videos for another 8 minutes.
@@ -517,8 +563,8 @@ class ExperimentApp:
         Thank you again for your participation!
         """
 
-        # Insert dummy text
-        text_widget.insert(tk.END, dummy_text.strip())
+        # Insert information text
+        text_widget.insert(tk.END, information_text.strip(), "left")
         text_widget.config(state=tk.DISABLED)  # Make text read-only
 
     def show_memorizing_screen(self):
@@ -530,6 +576,9 @@ class ExperimentApp:
         # Create main container
         main_container = tk.Frame(self.root, bg='white')
         main_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # Create footer
+        self.create_footer(main_container)
 
         # Title (smaller)
         title_label = tk.Label(
@@ -553,7 +602,7 @@ class ExperimentApp:
         list_title = tk.Label(
             list_frame,
             text="Word Pairs",
-            font=("Arial", 12, "bold"),
+            font=("Arial", 16, "bold"),
             bg='white',
             fg='black'
         )
@@ -584,7 +633,7 @@ class ExperimentApp:
             number_label = tk.Label(
                 pair_frame,
                 text=f"{index + 1}.",
-                font=("Arial", 8, "bold"),
+                font=("Arial", 12, "bold"),
                 bg='white',
                 fg='black',
                 width=2,
@@ -596,7 +645,7 @@ class ExperimentApp:
             ice_label = tk.Label(
                 pair_frame,
                 text=ice_word,
-                font=("Arial", 10, "bold"),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
@@ -611,7 +660,7 @@ class ExperimentApp:
             arrow_label = tk.Label(
                 pair_frame,
                 text="→",
-                font=("Arial", 14, "bold"),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='darkblue',
                 width=2
@@ -622,7 +671,7 @@ class ExperimentApp:
             eng_label = tk.Label(
                 pair_frame,
                 text=eng_word,
-                font=("Arial", 10),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
@@ -710,7 +759,7 @@ class ExperimentApp:
             text="Next (Testing)",
             font=("Arial", 10),
             bg='orange',
-            fg='white',
+            fg='black',
             command=self.on_timer_finished,  # Use the same function as timer completion
             width=15,
             height=2
@@ -847,6 +896,9 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
+        # Create footer
+        self.create_footer(main_frame)
+
         # Title
         title_label = tk.Label(
             main_frame,
@@ -888,7 +940,7 @@ class ExperimentApp:
             text="Skip Break (Testing)",
             font=("Arial", 12),
             bg='orange',
-            fg='white',
+            fg='black',
             command=self.on_first_break_finished,
             width=20,
             height=2
@@ -946,6 +998,9 @@ class ExperimentApp:
         # Create main frame
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Create footer
+        self.create_footer(main_frame)
 
         # Title
         title_label = tk.Label(
@@ -1109,6 +1164,9 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
+        # Create footer
+        self.create_footer(main_frame)
+
         # Title
         title_label = tk.Label(
             main_frame,
@@ -1149,7 +1207,7 @@ class ExperimentApp:
             text="Skip Break (Testing)",
             font=("Arial", 12),
             bg='orange',
-            fg='white',
+            fg='black',
             command=self.on_second_break_finished,
             width=20,
             height=2
@@ -1207,6 +1265,9 @@ class ExperimentApp:
         # Create main frame
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Create footer
+        self.create_footer(main_frame)
 
         # Title
         title_label = tk.Label(
@@ -1330,6 +1391,9 @@ class ExperimentApp:
         # Create main frame
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Create footer
+        self.create_footer(main_frame)
 
         # Title
         title_label = tk.Label(
@@ -1663,8 +1727,8 @@ class ExperimentApp:
             for _, row in df.iterrows():
                 answer_raw = row.get('answer', '')
                 
-                # Handle empty/null answers
-                if pd.isna(answer_raw) or answer_raw == '':
+                # Handle empty/null answers and "none" as no answer
+                if pd.isna(answer_raw) or answer_raw == '' or str(answer_raw).strip().lower() == 'none':
                     answer = ''
                     answer_display = '(no answer)'
                 else:
@@ -1828,6 +1892,9 @@ class ExperimentApp:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
+        # Create footer
+        self.create_footer(main_frame)
+
         # Top bar with title and Next button
         top_bar = tk.Frame(main_frame, bg='white')
         top_bar.pack(fill=tk.X, pady=(0, 30))
@@ -1926,6 +1993,9 @@ class ExperimentApp:
         main_container = tk.Frame(self.root, bg='white')
         main_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
+        # Create footer
+        self.create_footer(main_container)
+
         # Title (smaller)
         title_label = tk.Label(
             main_container,
@@ -1948,7 +2018,7 @@ class ExperimentApp:
         list_title = tk.Label(
             list_frame,
             text="Word Pairs",
-            font=("Arial", 12, "bold"),
+            font=("Arial", 16, "bold"),
             bg='white',
             fg='black'
         )
@@ -1979,7 +2049,7 @@ class ExperimentApp:
             number_label = tk.Label(
                 pair_frame,
                 text=f"{index + 1}.",
-                font=("Arial", 8, "bold"),
+                font=("Arial", 12, "bold"),
                 bg='white',
                 fg='black',
                 width=2,
@@ -1991,7 +2061,7 @@ class ExperimentApp:
             ice_label = tk.Label(
                 pair_frame,
                 text=ice_word,
-                font=("Arial", 10, "bold"),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
@@ -2006,7 +2076,7 @@ class ExperimentApp:
             arrow_label = tk.Label(
                 pair_frame,
                 text="→",
-                font=("Arial", 14, "bold"),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='darkblue',
                 width=2
@@ -2017,7 +2087,7 @@ class ExperimentApp:
             eng_label = tk.Label(
                 pair_frame,
                 text=eng_word,
-                font=("Arial", 10),
+                font=("Arial", 16, "bold"),
                 bg='white',
                 fg='black',
                 relief=tk.FLAT,
@@ -2105,7 +2175,7 @@ class ExperimentApp:
             text="Next (Testing)",
             font=("Arial", 10),
             bg='orange',
-            fg='white',
+            fg='black',
             command=self.on_second_timer_finished,
             width=15,
             height=2
