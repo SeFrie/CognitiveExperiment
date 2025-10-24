@@ -504,13 +504,13 @@ class ExperimentApp:
         
         We are very grateful for your participation.
         This experiment consists of several parts, including memorization and recall tasks.
-        First you will be presented with a list of 25 word pairs to memorize in 4 minutes.
-        Then you will use your personal YouTube account to watch YouTube short videos for 8 minutes.
-        After a set period of time, you will be tested for 3 minutes on your memory of these word pairs.
-        You will then be presented with another list of 25 word pairs to memorize in 4 minutes.
+        First you will be presented with a list of 20 word pairs to memorize in 4 minutes.
+        Then you will watch YouTube short videos for 8 minutes, the examiner will tell you on which account.
+        Afterwards, you will be tested for 3 minutes on your memory of these word pairs.
+        You will then be presented with another list of 20 word pairs to memorize in 4 minutes.
         Then watch YouTube short videos for another 8 minutes.
-        Finally, you will be tested again on your memory of the 25 new word pairs for 3 minutes.
-        Your responses will be recorded in a text file for analysis.
+        Finally, you will be tested again on your memory of the 20 new word pairs for 3 minutes.
+        Your responses will be recorded in a csv file for analysis.
         
         If you have any questions, feel free to ask the experimenter before we begin.
         Remember you can leave the experiment at any time if you feel uncomfortable.
@@ -870,10 +870,9 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="Please open the YouTube app on your phone."
-                 "\nMake sure you are logged in to you personal account." 
+            text="Please open Youtube Shorts on your phone like the examiner told you."
                  "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe next memorization session will begin automatically when the timer expires.",
+                 "\nThe memorization session will begin when the timer expires.",
 
 
             font=("Arial", 14),
@@ -951,7 +950,7 @@ class ExperimentApp:
         # Title
         title_label = tk.Label(
             main_frame,
-            text="Get Ready for the Next Test",
+            text="Get Ready for the next Test",
             font=("Arial", 36, "bold"),
             bg='white',
             fg='darkblue'
@@ -1136,7 +1135,8 @@ class ExperimentApp:
             text="Please open the YouTube app on your phone."
                  "\nMake sure you are logged in to you personal account."
                  "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe next memorization session will begin automatically when the timer expires.",            font=("Arial", 14),
+                 "\nThe next memorization session will begin automatically when the timer expires.", 
+            font=("Arial", 14),
             bg='white',
             fg='black',
             justify=tk.CENTER
@@ -2088,7 +2088,7 @@ class ExperimentApp:
         instruction_text = """
         Review the word pairs again. You have 4 minutes to refresh your memory of the associations between the Icelandic and English words.
 
-        After the time expires, you will be tested again on your remembrance of these word pairs. The questions will be presented in a different order.
+        After the time expires, you will be tested again on your remembrance of these word pairs.
 
         Good luck with your second memorization session!
         """
