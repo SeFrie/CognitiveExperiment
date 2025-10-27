@@ -1118,7 +1118,7 @@ class ExperimentApp:
         # Skip button
         skip_button = tk.Button(
             main_frame,
-            text="Skip",
+            text="Skip Break",
             command=self.skip_first_get_ready,
             font=("Arial", 16),
             bg='lightblue',
@@ -1385,7 +1385,7 @@ class ExperimentApp:
         # Skip button
         skip_button = tk.Button(
             main_frame,
-            text="Skip",
+            text="Skip Break",
             command=self.skip_second_get_ready,
             font=("Arial", 16),
             bg='lightblue',
