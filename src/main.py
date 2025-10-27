@@ -873,7 +873,89 @@ class ExperimentApp:
     def on_first_test_completed(self, answers):
         """Handle FIRST test completion"""
         print(f"First test completed with {len(answers)} answers")
-        # After first test, show second memorizing screen
+        # After first test, show 20-second break before second memorizing screen
+        self.show_intermediate_break_screen()
+
+    def show_intermediate_break_screen(self):
+        """Display a 10-second break screen between first test and second memorizing screen"""
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Create main frame
+        main_frame = tk.Frame(self.root, bg='white')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Create footer
+        self.create_footer(main_frame)
+
+        # Title
+        title_label = tk.Label(
+            main_frame,
+            text="Break Time - 10 Seconds",
+            font=("Arial", 32, "bold"),
+            bg='white',
+            fg='black'
+        )
+        title_label.pack(pady=(50, 20))
+
+        # Countdown timer display
+        self.timer_display = tk.Label(
+            main_frame,
+            text="20",
+            font=("Arial", 72, "bold"),
+            bg='white',
+            fg='red'
+        )
+        self.timer_display.pack(pady=40)
+
+        # Instructions
+        instruction_text = tk.Label(
+            main_frame,
+            text="Please get ready for the next test.\n\nThe second memorization session will begin shortly.",
+            font=("Arial", 18),
+            bg='white',
+            fg='black',
+            justify=tk.CENTER
+        )
+        instruction_text.pack(pady=20)
+
+        # Skip button for testing
+        skip_button = tk.Button(
+            main_frame,
+            text="Skip Break",
+            font=("Arial", 16),
+            bg='orange',
+            fg='black',
+            command=self.skip_intermediate_break,
+            width=20,
+            height=2
+        )
+        skip_button.pack(pady=10)
+
+        # Start the 10-second countdown
+        self.intermediate_break_countdown = 10
+        self.start_intermediate_break_countdown()
+
+    def start_intermediate_break_countdown(self):
+        """Start the countdown timer for the intermediate break"""
+        if self.intermediate_break_countdown > 0:
+            self.timer_display.config(text=str(self.intermediate_break_countdown))
+            self.intermediate_break_countdown -= 1
+            self.intermediate_break_timer_id = self.root.after(1000, self.start_intermediate_break_countdown)
+        else:
+            # Timer finished, proceed to second memorizing screen
+            self.show_second_memorizing_screen()
+
+    def skip_intermediate_break(self):
+        """Skip the intermediate break countdown"""
+        # Cancel the timer if it's running
+        if hasattr(self, 'intermediate_break_timer_id'):
+            try:
+                self.root.after_cancel(self.intermediate_break_timer_id)
+            except:
+                pass
+        # Proceed directly to second memorizing screen
         self.show_second_memorizing_screen()
 
     def show_first_break_screen(self):
@@ -1025,7 +1107,7 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="The test will start in 20 seconds.\n\nPlease get ready!",
+            text="The test will start in 10 seconds.\n\nPlease get ready!",
             font=("Arial", 18),
             bg='white',
             fg='black',
@@ -1048,8 +1130,8 @@ class ExperimentApp:
         )
         skip_button.pack(pady=20)
 
-        # Start the 20-second countdown timer
-        self.get_ready_time_remaining = 20
+        # Start the 10-second countdown timer
+        self.get_ready_time_remaining = 10
         self.update_first_get_ready_timer()
 
     def update_first_get_ready_timer(self):
@@ -1292,7 +1374,7 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="The test will start in 20 seconds.\n\nPlease get ready!",
+            text="The test will start in 10 seconds.\n\nPlease get ready!",
             font=("Arial", 18),
             bg='white',
             fg='black',
@@ -1315,8 +1397,8 @@ class ExperimentApp:
         )
         skip_button.pack(pady=20)
 
-        # Start the 20-second countdown timer
-        self.get_ready_time_remaining_2 = 20
+        # Start the 10-second countdown timer
+        self.get_ready_time_remaining_2 = 10
         self.update_second_get_ready_timer()
 
     def update_second_get_ready_timer(self):
