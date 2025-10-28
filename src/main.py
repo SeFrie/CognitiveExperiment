@@ -8,6 +8,7 @@ import random
 from datetime import datetime
 from test_screen import TestScreen
 from second_test_screen import SecondTestScreen
+import textwrap
 
 class ExperimentApp:
     def __init__(self, root):
@@ -525,7 +526,7 @@ class ExperimentApp:
         # Text widget with scrollbar
         text_widget = tk.Text(
             text_frame,
-            font=("Arial", 24),
+            font=("Arial", 18),
             bg='white',
             fg='black',
             wrap=tk.WORD,
@@ -544,7 +545,7 @@ class ExperimentApp:
 
 
         # Dummy text content
-        information_text = """
+        information_text = textwrap.dedent("""
         Welcome to this cognitive science experiment.
         
         We are very grateful for your participation.
@@ -561,7 +562,7 @@ class ExperimentApp:
         If you have any questions, feel free to ask the experimenter before we begin.
         Remember you can leave the experiment at any time if you feel uncomfortable.
         Thank you again for your participation!
-        """
+        """)
 
         # Insert information text
         text_widget.insert(tk.END, information_text.strip(), "left")
@@ -742,7 +743,7 @@ class ExperimentApp:
         instruction_text = """
         Study the word pairs carefully. You have 4 minutes to memorize the associations between the Icelandic and English words.
 
-        After the time expires, you will be tested on your remembrance of these word pairs.
+        After the time has elapsed, you will be tested on your memory of these word pairs.
 
         Good luck with your memorization!
         """
@@ -912,7 +913,9 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="Please get ready for the next test.\n\nThe second memorization session will begin shortly.",
+            text="Please get ready for the next test.\n"
+            "The second memorization session will begin shortly.",
+            
             font=("Arial", 18),
             bg='white',
             fg='black',
@@ -1087,7 +1090,7 @@ class ExperimentApp:
         # Title
         title_label = tk.Label(
             main_frame,
-            text="Get Ready for the next Test",
+            text="Get ready for the next test",
             font=("Arial", 36, "bold"),
             bg='white',
             fg='darkblue'
@@ -1272,10 +1275,9 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="Please open the YouTube app on your phone."
-                 "\nMake sure you are logged in to you personal account."
+            text="Please open Youtube Shorts on your phone like the examiner told you."
                  "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe next memorization session will begin automatically when the timer expires.", 
+                 "\nThe memorization session will begin when the timer expires.", 
             font=("Arial", 14),
             bg='white',
             fg='black',
@@ -1354,7 +1356,7 @@ class ExperimentApp:
         # Title
         title_label = tk.Label(
             main_frame,
-            text="Get Ready for the Next Test",
+            text="Get ready for the next test",
             font=("Arial", 36, "bold"),
             bg='white',
             fg='darkblue'
