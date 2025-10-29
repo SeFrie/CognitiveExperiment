@@ -550,10 +550,11 @@ class ExperimentApp:
         
         We are very grateful for your participation.
         This experiment consists of several parts, including memorization and recall tasks.
+                                           
         First you will be presented with a list of 20 word pairs to memorize in 4 minutes.
         Then you will watch YouTube short videos for 8 minutes, the examiner will tell you on which account.
-        
         Afterwards, you will be tested for 3 minutes on your memory of these word pairs.
+                                           
         You will then be presented with another list of 20 word pairs to memorize in 4 minutes.
         Then watch YouTube short videos for another 8 minutes.
         Finally, you will be tested again on your memory of the 20 new word pairs for 3 minutes.
@@ -913,7 +914,7 @@ class ExperimentApp:
         # Instructions
         instruction_text = tk.Label(
             main_frame,
-            text="Please get ready for the next test.\n"
+            text="Please get ready for the next word list.\n"
             "The second memorization session will begin shortly.",
             
             font=("Arial", 18),
