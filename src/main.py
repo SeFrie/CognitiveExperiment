@@ -988,7 +988,7 @@ class ExperimentApp:
         # Title
         title_label = tk.Label(
             main_frame,
-            text="Break Time - 8 Minutes",
+            text="YouTube Time - 8 Minutes",
             font=("Arial", 32, "bold"),
             bg='white',
             fg='black'
@@ -1256,7 +1256,7 @@ class ExperimentApp:
         # Title
         title_label = tk.Label(
             main_frame,
-            text="Break Time - 8 Minutes",
+            text="YouTube Time - 8 Minutes",
             font=("Arial", 32, "bold"),
             bg='white',
             fg='black'
