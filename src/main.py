@@ -840,7 +840,7 @@ class ExperimentApp:
             parent_frame.grid_columnconfigure(i, weight=1)
 
     def start_countdown_timer(self):
-        """Start the 8-minute countdown timer for FIRST memorization"""
+        """Start the 4-minute countdown timer for FIRST memorization"""
         self.time_remaining = 4 * 60  # 4 minutes in seconds
         self.update_first_timer()
 
@@ -901,10 +901,10 @@ class ExperimentApp:
         )
         title_label.pack(pady=(50, 20))
 
-        # Countdown timer display
+        # Countdown timer display (starts with "10" in red)
         self.timer_display = tk.Label(
             main_frame,
-            text="20",
+            text="10",
             font=("Arial", 72, "bold"),
             bg='white',
             fg='red'
@@ -915,7 +915,7 @@ class ExperimentApp:
         instruction_text = tk.Label(
             main_frame,
             text="Please get ready for the next word list.\n"
-            "The second memorization session will begin shortly.",
+            "The next memorization session will begin shortly.",
             
             font=("Arial", 18),
             bg='white',
@@ -924,21 +924,10 @@ class ExperimentApp:
         )
         instruction_text.pack(pady=20)
 
-        # Skip button for testing
-        skip_button = tk.Button(
-            main_frame,
-            text="Skip Break",
-            font=("Arial", 16),
-            bg='orange',
-            fg='black',
-            command=self.skip_intermediate_break,
-            width=20,
-            height=2
-        )
-        skip_button.pack(pady=10)
-
-        # Start the 10-second countdown
+        # Initialize countdown to 10 seconds
         self.intermediate_break_countdown = 10
+        
+        # Start the countdown automatically
         self.start_intermediate_break_countdown()
 
     def start_intermediate_break_countdown(self):
@@ -995,13 +984,13 @@ class ExperimentApp:
         )
         title_label.pack(pady=(0, 20))
 
-        # Countdown timer display
+        # Countdown timer display (initially shows "Ready")
         self.timer_display = tk.Label(
             main_frame,
-            text="08:00",
+            text="Ready",
             font=("Arial", 48, "bold"),
             bg='white',
-            fg='red'  # Red color
+            fg='gray'
         )
         self.timer_display.pack(pady=20)
 
@@ -1010,7 +999,7 @@ class ExperimentApp:
             main_frame,
             text="Please open Youtube Shorts on your phone like the examiner told you."
                  "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe memorization session will begin when the timer expires.",
+                 "\nPress the button below to start the break timer.",
 
 
             font=("Arial", 14),
@@ -1019,6 +1008,19 @@ class ExperimentApp:
             justify=tk.CENTER
         )
         instruction_text.pack(pady=20)
+
+        # Start Timer button
+        self.start_timer_button = tk.Button(
+            main_frame,
+            text="Start Timer",
+            font=("Arial", 16),
+            bg='lightgreen',
+            fg='black',
+            command=self.start_first_break_timer,
+            width=20,
+            height=2
+        )
+        self.start_timer_button.pack(pady=10)
 
         # Skip button for testing
         next_button = tk.Button(
@@ -1033,8 +1035,19 @@ class ExperimentApp:
         )
         next_button.pack(pady=10)
 
-        # Start the 8-minute break timer
+        # Initialize but don't start the timer yet
         self.break_time_remaining = 8 * 60
+
+    def start_first_break_timer(self):
+        """Start the 8-minute break timer when the button is pressed"""
+        # Hide the start button
+        if hasattr(self, 'start_timer_button'):
+            self.start_timer_button.pack_forget()
+        
+        # Update timer display to show initial time
+        self.timer_display.config(text="08:00", fg='blue')
+        
+        # Start the countdown
         self.update_first_break_timer()
 
     def update_first_break_timer(self):
@@ -1263,13 +1276,13 @@ class ExperimentApp:
         )
         title_label.pack(pady=(0, 20))
 
-        # Countdown timer display
+        # Countdown timer display (initially shows "Ready")
         self.timer_display = tk.Label(
             main_frame,
-            text="08:00",
+            text="Ready",
             font=("Arial", 48, "bold"),
             bg='white',
-            fg='red'
+            fg='gray'
         )
         self.timer_display.pack(pady=20)
 
@@ -1278,13 +1291,26 @@ class ExperimentApp:
             main_frame,
             text="Please open Youtube Shorts on your phone like the examiner told you."
                  "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe memorization session will begin when the timer expires.", 
+                 "\nPress the button below to start the break timer.", 
             font=("Arial", 14),
             bg='white',
             fg='black',
             justify=tk.CENTER
         )
         instruction_text.pack(pady=20)
+
+        # Start Timer button
+        self.start_second_timer_button = tk.Button(
+            main_frame,
+            text="Start Timer",
+            font=("Arial", 16),
+            bg='lightgreen',
+            fg='black',
+            command=self.start_second_break_timer,
+            width=20,
+            height=2
+        )
+        self.start_second_timer_button.pack(pady=10)
 
         # Skip button for testing
         next_button = tk.Button(
@@ -1299,8 +1325,19 @@ class ExperimentApp:
         )
         next_button.pack(pady=10)
 
-        # Start the 8-minute break timer
+        # Initialize but don't start the timer yet
         self.second_break_time_remaining = 8 * 60
+
+    def start_second_break_timer(self):
+        """Start the 8-minute second break timer when the button is pressed"""
+        # Hide the start button
+        if hasattr(self, 'start_second_timer_button'):
+            self.start_second_timer_button.pack_forget()
+        
+        # Update timer display to show initial time
+        self.timer_display.config(text="08:00", fg='blue')
+        
+        # Start the countdown
         self.update_second_break_timer()
 
     def update_second_break_timer(self):
