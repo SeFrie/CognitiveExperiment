@@ -1008,10 +1008,23 @@ class ExperimentApp:
         # Instructions - choose based on personalization flag
         if self.personalization_flag:
             # Personalized mode
-            instruction_message = "PERSONAL"
+            instruction_message ="""PERSONAL
+
+            Please watch YouTube Shorts on your personalized account.
+            Open your YouTube app, be sure you are logged into your account.
+            You can put on your headphones if you like.
+
+            Start the timer when you are ready and start scrolling through your personalized YouTube Shorts feed.
+            After the timer expires, you have some seconds to go back to the screen and be ready for the memorization test.
+            """
         else:
             # Non-personalized mode
-            instruction_message = "NON-PERSONAL"
+            instruction_message ="""NON-PERSONAL
+            Please open an Incognito Tab in your browser and go to youtube.com.
+            You can put on your headphones if you like.
+
+            Start the timer when you are ready and start scrolling through the Shorts feed.
+            After the timer expires, you have some seconds to go back to the screen and be ready for the memorization test."""
 
         instruction_text = tk.Label(
             main_frame,
@@ -1019,7 +1032,8 @@ class ExperimentApp:
             font=("Arial", 14),
             bg='white',
             fg='black',
-            justify=tk.CENTER
+            justify=tk.CENTER,
+            wraplength=800
         )
         instruction_text.pack(pady=20)
 
@@ -1303,10 +1317,25 @@ class ExperimentApp:
         # Instructions - choose OPPOSITE of personalization flag (swap for second break)
         if self.personalization_flag:
             # If first break was Personalized, second break is Non-personalized
-            instruction_message = "NON-PERSONAL"
+           instruction_message ="""NON-PERSONAL
+            Please open an Incognito Tab in your browser and go to youtube.com.
+            You can put on your headphones if you like.
+
+            Start the timer when you are ready and start scrolling through the Shorts feed.
+            After the timer expires, you have some seconds to go back to the screen and be ready for the memorization test."""     
         else:
             # If first break was Non-personalized, second break is Personalized
-            instruction_message = "PERSONAL"
+           instruction_message ="""PERSONAL
+
+            Please watch YouTube Shorts on your personalized account.
+            Open your YouTube app, be sure you are logged into your account.
+            You can put on your headphones if you like.
+
+            Start the timer when you are ready and start scrolling through your personalized YouTube Shorts feed.
+            After the timer expires, you have some seconds to go back to the screen and be ready for the memorization test.
+            """
+
+    
 
         instruction_text = tk.Label(
             main_frame,
