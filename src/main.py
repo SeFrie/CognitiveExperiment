@@ -995,30 +995,46 @@ class ExperimentApp:
         )
         title_label.pack(pady=(0, 20))
 
-        # Countdown timer display
+        # Countdown timer display (initially shows "Ready")
         self.timer_display = tk.Label(
             main_frame,
-            text="08:00",
+            text="Ready",
             font=("Arial", 48, "bold"),
             bg='white',
-            fg='red'  # Red color
+            fg='gray'
         )
         self.timer_display.pack(pady=20)
 
-        # Instructions
+        # Instructions - choose based on personalization flag
+        if self.personalization_flag:
+            # Personalized mode
+            instruction_message = "PERSONAL"
+        else:
+            # Non-personalized mode
+            instruction_message = "NON-PERSONAL"
+
         instruction_text = tk.Label(
             main_frame,
-            text="Please open Youtube Shorts on your phone like the examiner told you."
-                 "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe memorization session will begin when the timer expires.",
-
-
+            text=instruction_message,
             font=("Arial", 14),
             bg='white',
             fg='black',
             justify=tk.CENTER
         )
         instruction_text.pack(pady=20)
+
+        # Start Timer button
+        self.start_timer_button = tk.Button(
+            main_frame,
+            text="Start Timer",
+            font=("Arial", 16),
+            bg='lightgreen',
+            fg='black',
+            command=self.start_first_break_timer,
+            width=20,
+            height=2
+        )
+        self.start_timer_button.pack(pady=10)
 
         # Skip button for testing
         next_button = tk.Button(
@@ -1033,8 +1049,19 @@ class ExperimentApp:
         )
         next_button.pack(pady=10)
 
-        # Start the 8-minute break timer
+        # Initialize but don't start the timer yet
         self.break_time_remaining = 8 * 60
+
+    def start_first_break_timer(self):
+        """Start the 8-minute break timer when the button is pressed"""
+        # Hide the start button
+        if hasattr(self, 'start_timer_button'):
+            self.start_timer_button.pack_forget()
+        
+        # Update timer display to show initial time
+        self.timer_display.config(text="08:00", fg='blue')
+        
+        # Start the countdown
         self.update_first_break_timer()
 
     def update_first_break_timer(self):
@@ -1263,28 +1290,46 @@ class ExperimentApp:
         )
         title_label.pack(pady=(0, 20))
 
-        # Countdown timer display
+        # Countdown timer display (initially shows "Ready")
         self.timer_display = tk.Label(
             main_frame,
-            text="08:00",
+            text="Ready",
             font=("Arial", 48, "bold"),
             bg='white',
-            fg='red'
+            fg='gray'
         )
         self.timer_display.pack(pady=20)
 
-        # Instructions
+        # Instructions - choose OPPOSITE of personalization flag (swap for second break)
+        if self.personalization_flag:
+            # If first break was Personalized, second break is Non-personalized
+            instruction_message = "NON-PERSONAL"
+        else:
+            # If first break was Non-personalized, second break is Personalized
+            instruction_message = "PERSONAL"
+
         instruction_text = tk.Label(
             main_frame,
-            text="Please open Youtube Shorts on your phone like the examiner told you."
-                 "\nPlease spend the next 8 minutes scrolling through YouTube Short videos."
-                 "\nThe memorization session will begin when the timer expires.", 
+            text=instruction_message,
             font=("Arial", 14),
             bg='white',
             fg='black',
             justify=tk.CENTER
         )
         instruction_text.pack(pady=20)
+
+        # Start Timer button
+        self.start_second_timer_button = tk.Button(
+            main_frame,
+            text="Start Timer",
+            font=("Arial", 16),
+            bg='lightgreen',
+            fg='black',
+            command=self.start_second_break_timer,
+            width=20,
+            height=2
+        )
+        self.start_second_timer_button.pack(pady=10)
 
         # Skip button for testing
         next_button = tk.Button(
@@ -1299,8 +1344,19 @@ class ExperimentApp:
         )
         next_button.pack(pady=10)
 
-        # Start the 8-minute break timer
+        # Initialize but don't start the timer yet
         self.second_break_time_remaining = 8 * 60
+
+    def start_second_break_timer(self):
+        """Start the 8-minute second break timer when the button is pressed"""
+        # Hide the start button
+        if hasattr(self, 'start_second_timer_button'):
+            self.start_second_timer_button.pack_forget()
+        
+        # Update timer display to show initial time
+        self.timer_display.config(text="08:00", fg='blue')
+        
+        # Start the countdown
         self.update_second_break_timer()
 
     def update_second_break_timer(self):
