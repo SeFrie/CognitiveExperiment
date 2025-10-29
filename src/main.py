@@ -766,7 +766,7 @@ class ExperimentApp:
             width=15,
             height=2
         )
-        next_button.pack()
+       # next_button.pack()
 
         # Start the countdown timer
         self.start_countdown_timer()
@@ -1061,7 +1061,7 @@ class ExperimentApp:
             width=20,
             height=2
         )
-        next_button.pack(pady=10)
+       # next_button.pack(pady=10)
 
         # Initialize but don't start the timer yet
         self.break_time_remaining = 8 * 60
@@ -1371,7 +1371,7 @@ class ExperimentApp:
             width=20,
             height=2
         )
-        next_button.pack(pady=10)
+        #next_button.pack(pady=10)
 
         # Initialize but don't start the timer yet
         self.second_break_time_remaining = 8 * 60
@@ -2350,7 +2350,7 @@ class ExperimentApp:
             width=15,
             height=2
         )
-        next_button.pack()
+       # next_button.pack()
 
         # Start the countdown timer for second memorization
         self.start_second_countdown_timer()
