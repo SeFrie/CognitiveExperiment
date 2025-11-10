@@ -37,6 +37,7 @@ PN,ae9e001e
 PN,ea3152e9
 NP,75b3bb64
 NP,d2f7f91e
+NP,15c05f54
 """
 
 mapping_df = pd.read_csv(StringIO(mapping_data))
