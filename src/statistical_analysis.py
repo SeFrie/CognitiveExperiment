@@ -38,6 +38,13 @@ PN,ea3152e9
 NP,75b3bb64
 NP,d2f7f91e
 NP,15c05f54
+PN,81a463c0
+NP,aa6f473f
+PN,1c4deccf
+NP,e628612d
+PN,6521b425
+PN,c7fdcf89
+PN,2eac1f8f
 """
 
 mapping_df = pd.read_csv(StringIO(mapping_data))
@@ -95,6 +102,24 @@ print(results.head())
 ###### PLOTS ######
 
 
+#plot histogram with interpolation for accuracy distributions
+#in two panels for each condition
+#with seaborn
+import seaborn as sns   
+
+
+fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+sns.histplot(results['accuracy_N'], bins=10, kde=True, ax=axs[0], color='skyblue')
+axs[0].set_title('Accuracy Distribution: Non-personalized (N)') 
+axs[0].set_xlabel('Accuracy')
+axs[0].set_ylabel('Frequency')
+sns.histplot(results['accuracy_P'], bins=10, kde=True, ax=axs[1], color='salmon')
+axs[1].set_title('Accuracy Distribution: Personalized (P)')
+axs[1].set_xlabel('Accuracy')
+plt.tight_layout()
+plt.show()
+
+
 # bar plot for accuracy by condition for each experiment
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -145,6 +170,13 @@ plt.ylabel('Accuracy')
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
+
+
+
+
+
+
+
 
 
 
