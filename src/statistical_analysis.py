@@ -45,6 +45,9 @@ NP,e628612d
 PN,6521b425
 PN,c7fdcf89
 PN,2eac1f8f
+NP,38471d30
+NP,d6d3b091
+NP,ced624c2
 """
 
 mapping_df = pd.read_csv(StringIO(mapping_data))
@@ -109,11 +112,11 @@ import seaborn as sns
 
 
 fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
-sns.histplot(results['accuracy_N'], bins=10, kde=True, ax=axs[0], color='skyblue')
+sns.histplot(results['accuracy_N'], bins=10, kde=True, ax=axs[0], color='tab:blue')
 axs[0].set_title('Accuracy Distribution: Non-personalized (N)') 
 axs[0].set_xlabel('Accuracy')
 axs[0].set_ylabel('Frequency')
-sns.histplot(results['accuracy_P'], bins=10, kde=True, ax=axs[1], color='salmon')
+sns.histplot(results['accuracy_P'], bins=10, kde=True, ax=axs[1], color='tab:orange')
 axs[1].set_title('Accuracy Distribution: Personalized (P)')
 axs[1].set_xlabel('Accuracy')
 plt.tight_layout()
@@ -130,7 +133,11 @@ bars_P = ax.bar(x + width/2, results['accuracy_P'], width, label='Personalized')
 
 ax.bar_label(bars_N, labels=[f"{v*100:.1f}%" for v in results['accuracy_N']], padding=3, fontsize=7)
 ax.bar_label(bars_P, labels=[f"{v*100:.1f}%" for v in results['accuracy_P']], padding=3, fontsize=7)
-
+#add average lines
+avg_N = results['accuracy_N'].mean()
+avg_P = results['accuracy_P'].mean()
+ax.axhline(avg_N, color='blue', linestyle='--', linewidth=1, label=f'Mean Non-personalized {avg_N*100:.1f}%')
+ax.axhline(avg_P, color='orange', linestyle='--', linewidth=1, label=f'Mean Personalized {avg_P*100:.1f}%')
 
 ax.set_xlabel('Experiment ID')
 ax.set_ylabel('Accuracy')
@@ -172,6 +179,36 @@ plt.tight_layout()
 plt.show()
 
 
+# box plot for accuracy distribution by condition with lines connecting paired samples
+data = [results['accuracy_N'], results['accuracy_P']]
+
+plt.figure(figsize=(6, 6))
+
+plt.boxplot(data, 
+            labels=['Non-personalized (N)', 'Personalized (P)'], patch_artist=True,
+            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+            medianprops=dict(color='red', linewidth=2),
+            whiskerprops=dict(color='black'),
+            capprops=dict(color='black'),)
+
+# --- Overlay individual datapoints (jittered) ---
+for i, acc in enumerate(data, start=1):
+    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
+    plt.scatter(x_jitter, 
+                acc, 
+                alpha=0.6, 
+                edgecolors='black', 
+                linewidth=0.5,
+                s=50,)
+    # --- Connect paired samples with lines ---
+for n, p in zip(results['accuracy_N'], results['accuracy_P']):
+    plt.plot([1, 2], [n, p], color='gray', alpha=0.6, linewidth=1)
+
+plt.title('Paired Accuracy Comparison: Personalized vs Non-personalized')
+plt.ylabel('Accuracy')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
 
 
 
