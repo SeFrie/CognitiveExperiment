@@ -102,6 +102,80 @@ print(results.head())
 
 
 
+#print number of participants having accuracy_P > accuracy_N
+num_better_P = (results['accuracy_P'] > results['accuracy_N']).sum()
+print(f"Number of participants with better accuracy in Personalized (P) than Non-personalized (N): {num_better_P}")
+
+num_better_N = (results['accuracy_N'] > results['accuracy_P']).sum()
+print(f"Number of participants with better accuracy in Non-personalized (N) than Personalized (P): {num_better_N}")
+
+num_equal = (results['accuracy_N'] == results['accuracy_P']).sum()
+print(f"Number of participants with equal accuracy in both conditions: {num_equal}")
+
+#print number of participants having accuracy in first test > second test
+first_test = []
+second_test = []
+for _, row in results.iterrows():
+    if row['Condition'] == 'PN':
+        first_test.append(row['accuracy_P'])
+        second_test.append(row['accuracy_N'])
+    else:
+        first_test.append(row['accuracy_N'])
+        second_test.append(row['accuracy_P'])
+num_better_first = sum(1 for ft, st in zip(first_test, second_test) if ft > st)
+print(f"Number of participants with better accuracy in First Test than Second Test: {num_better_first}")
+num_better_second = sum(1 for ft, st in zip(first_test, second_test) if st > ft)
+print(f"Number of participants with better accuracy in Second Test than First Test: {num_better_second}")
+num_equal_tests = sum(1 for ft, st in zip(first_test, second_test) if ft == st)
+print(f"Number of participants with equal accuracy in both tests: {num_equal_tests}")   
+
+
+###Youtube usage filtering###
+# filter for youtube usage more than 45 min, count number of participants
+filtered_results = results[results['youtube_usage'] == "More than 45 minutes"]
+num_participants = filtered_results.shape[0]
+print(f"Number of participants with YouTube usage > 45 min: {num_participants}")
+
+filtered_results = results[results['youtube_usage'] == "16-45 minutes"]
+num_participants = filtered_results.shape[0]
+print(f"Number of participants with YouTube usage 16-45 min: {num_participants}")
+
+filtered_results = results[results['youtube_usage'] == "0-15 minutes"]
+num_participants = filtered_results.shape[0]
+print(f"Number of participants with YouTube usage 0-15 min: {num_participants}")
+
+
+filtered_results_youtubeUsage = results[results['youtube_usage'] != "0-15 minutes"]
+num_participants = filtered_results_youtubeUsage.shape[0]
+print(f"Number of participants with YouTube usage > 15 min: {num_participants}")
+
+#print number of participants having accuracy_P > accuracy_N in filtered results_youtubeUsage
+num_better_P_filtered = (filtered_results_youtubeUsage['accuracy_P'] > filtered_results_youtubeUsage['accuracy_N']).sum()
+print(f"Number of participants with better accuracy in Personalized (P) than Non-personalized (N) (YouTube usage > 15 min): {num_better_P_filtered}")   
+
+#print number of participants having accuracy_N > accuracy_P in filtered results_youtubeUsage
+num_better_N_filtered = (filtered_results_youtubeUsage['accuracy_N'] > filtered_results_youtubeUsage['accuracy_P']).sum()
+print(f"Number of participants with better accuracy in Non-personalized (N) than Personalized (P) (YouTube usage > 15 min): {num_better_N_filtered}")
+num_equal_filtered = (filtered_results_youtubeUsage['accuracy_N'] == filtered_results_youtubeUsage['accuracy_P']).sum()
+print(f"Number of participants with equal accuracy in both conditions (YouTube usage > 15 min): {num_equal_filtered}")  
+
+#print number of participants having accuracy in first test > second test in filtered results_youtubeUsage
+first_test_filtered = []    
+second_test_filtered = []
+for _, row in filtered_results_youtubeUsage.iterrows():
+    if row['Condition'] == 'PN':
+        first_test_filtered.append(row['accuracy_P'])
+        second_test_filtered.append(row['accuracy_N'])
+    else:
+        first_test_filtered.append(row['accuracy_N'])
+        second_test_filtered.append(row['accuracy_P'])
+num_better_first_filtered = sum(1 for ft, st in zip(first_test_filtered, second_test_filtered) if ft > st)
+print(f"Number of participants with better accuracy in First Test than Second Test (YouTube usage > 15 min): {num_better_first_filtered}")
+num_better_second_filtered = sum(1 for ft, st in zip(first_test_filtered, second_test_filtered) if st > ft)
+print(f"Number of participants with better accuracy in Second Test than First Test (YouTube usage > 15 min): {num_better_second_filtered}")
+num_equal_tests_filtered = sum(1 for ft, st in zip(first_test_filtered, second_test_filtered) if ft == st)
+print(f"Number of participants with equal accuracy in both tests (YouTube usage > 15 min): {num_equal_tests_filtered}") 
+
 
 ###### PLOTS ######
 
@@ -122,6 +196,20 @@ axs[1].set_title('Accuracy Distribution: Personalized (P)')
 axs[1].set_xlabel('Accuracy')
 plt.tight_layout()
 plt.show()
+
+
+fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+sns.histplot(filtered_results_youtubeUsage['accuracy_N'], bins=10, kde=True, ax=axs[0], color='tab:blue')
+axs[0].set_title('Accuracy Distribution: Non-personalized (N) in participants with YouTube usage > 15 min') 
+axs[0].set_xlabel('Accuracy')
+axs[0].set_ylabel('Frequency')
+sns.histplot(filtered_results_youtubeUsage['accuracy_P'], bins=10, kde=True, ax=axs[1], color='tab:orange')
+axs[1].set_title('Accuracy Distribution: Personalized (P) in participants with YouTube usage > 15 min')
+axs[1].set_xlabel('Accuracy')
+plt.tight_layout()
+plt.show()
+
+
 
 
 # bar plot for accuracy by condition for each experiment
@@ -177,7 +265,7 @@ plt.title('Accuracy Comparison: Personalized vs Non-personalized')
 plt.ylabel('Accuracy')
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
-plt.show()
+#plt.show()
 
 
 # box plot for accuracy distribution by condition with lines connecting paired samples
@@ -209,9 +297,148 @@ plt.title('Paired Accuracy Comparison: Personalized vs Non-personalized')
 plt.ylabel('Accuracy')
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
+#plt.show()
+
+
+
+
+
+# box plot for accuracy distribution by condition with lines connecting paired samples
+data = [filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P']]
+
+plt.figure(figsize=(6, 6))
+
+plt.boxplot(data, 
+            labels=['Non-personalized (N)', 'Personalized (P)'], patch_artist=True,
+            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+            medianprops=dict(color='red', linewidth=2),
+            whiskerprops=dict(color='black'),
+            capprops=dict(color='black'),)
+
+# --- Overlay individual datapoints (jittered) ---
+for i, acc in enumerate(data, start=1):
+    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
+    plt.scatter(x_jitter, 
+                acc, 
+                alpha=0.6, 
+                edgecolors='black', 
+                linewidth=0.5,
+                s=50,)
+    # --- Connect paired samples with lines ---
+for n, p in zip(filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P']):
+    plt.plot([1, 2], [n, p], color='gray', alpha=0.6, linewidth=1)
+
+plt.title('Accuracy comparison for YouTube Short usage > 15 min')
+plt.ylabel('Accuracy')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+#plt.show()
+
+
+
+#plot box plot for first and second test (getting out of Condition)
+# when condition = PN, first test = accuracy_P, second_test = accuracy_N
+# when condition = NP, first test = accuracy_N, second_test = accuracy_P
+#color points based on condition
+
+first_test = []
+second_test = []
+for _, row in results.iterrows():
+    if row['Condition'] == 'PN':
+        first_test.append(row['accuracy_P'])
+        second_test.append(row['accuracy_N'])
+    else:
+        first_test.append(row['accuracy_N'])
+        second_test.append(row['accuracy_P'])
+
+data = [first_test, second_test]
+plt.figure(figsize=(6, 6))
+plt.boxplot(data, 
+            labels=['First Test', 'Second Test'], patch_artist=True,
+            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+            medianprops=dict(color='red', linewidth=2),
+            whiskerprops=dict(color='black'),
+            capprops=dict(color='black'),)
+# --- Overlay individual datapoints (jittered) ---
+for i, acc in enumerate(data, start=1): 
+    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
+    plt.scatter(x_jitter, 
+                acc, 
+                alpha=0.6, 
+                edgecolors='black', 
+                linewidth=0.5,
+                s=50,)
+    # --- Connect paired samples with lines ---
+for ft, st in zip(first_test, second_test):
+    plt.plot([1, 2], [ft, st], color='gray', alpha=0.6, linewidth=1)
+plt.title('Paired Accuracy Comparison: First Test vs Second Test')
+plt.ylabel('Accuracy')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
 plt.show()
 
 
+first_test = []
+second_test = []
+first_colors = []
+second_colors = []
+
+for _, row in results.iterrows():
+    if row['Condition'] == 'PN':
+        # First = P, Second = N
+        first_test.append(row['accuracy_P'])
+        second_test.append(row['accuracy_N'])
+        first_colors.append('tab:orange')   # P
+        second_colors.append('tab:blue')    # N
+    else:
+        # First = N, Second = P
+        first_test.append(row['accuracy_N'])
+        second_test.append(row['accuracy_P'])
+        first_colors.append('tab:blue')     # N
+        second_colors.append('tab:orange')  # P
+
+data = [first_test, second_test]
+colors = [first_colors, second_colors]
+
+plt.figure(figsize=(6, 6))
+plt.boxplot(
+    data,
+    labels=['First Test', 'Second Test'], 
+    patch_artist=True,
+    boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+    medianprops=dict(color='red', linewidth=2),
+    whiskerprops=dict(color='black'),
+    capprops=dict(color='black')
+)
+
+# --- Overlay individual datapoints (jittered) ---
+for i, (acc, col) in enumerate(zip(data, colors), start=1):
+    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))
+    plt.scatter(
+        x_jitter,
+        acc,
+        c=col,                 # <-- color per-condition
+        alpha=0.7,
+        edgecolors='black',
+        linewidth=0.5,
+        s=50,
+    )
+
+# --- Connect paired samples ---
+for ft, st in zip(first_test, second_test):
+    plt.plot([1, 2], [ft, st], color='gray', alpha=0.6, linewidth=1)
+
+import matplotlib.patches as mpatches
+patch_P = mpatches.Patch(color='tab:orange', label='P')
+patch_N = mpatches.Patch(color='tab:blue', label='N')
+plt.legend(handles=[patch_P, patch_N], loc='upper right')
+
+
+plt.title('Paired Accuracy Comparison: First Test vs Second Test')
+plt.ylabel('Accuracy')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
 
 
 
@@ -263,3 +490,25 @@ if p < 0.05:
     print("Reject H0: Significant difference between conditions. The data provides sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
 else:
     print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
+
+# effect size of Wilcoxon test
+n = len(results)
+z = (stat - (n*(n+1))/4) / np.sqrt((n*(n+1)*(2*n+1))/24)
+r = z / np.sqrt(n)
+print(f"Effect size r: {r:.4f}")
+
+
+stat, p = wilcoxon(filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P'])
+print(f"Wilcoxon signed-rank test: stat={stat:.4f}, p={p:.4f}") 
+
+if p < 0.05:
+    print("Reject H0: Significant difference between conditions. The data provides sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
+else:
+    print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
+
+
+#compute variability (standard deviation) for each condition
+std_N = results['accuracy_N'].std()
+std_P = results['accuracy_P'].std()
+print(f"Standard Deviation Non-personalized (N): {std_N:.4f}")
+print(f"Standard Deviation Personalized (P): {std_P:.4f}")
