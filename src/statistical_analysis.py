@@ -130,7 +130,7 @@ num_equal_tests = sum(1 for ft, st in zip(first_test, second_test) if ft == st)
 print(f"Number of participants with equal accuracy in both tests: {num_equal_tests}")   
 
 
-###Youtube usage filtering###
+###-------------Youtube usage filtering---------------------------###
 # filter for youtube usage more than 45 min, count number of participants
 filtered_results = results[results['youtube_usage'] == "More than 45 minutes"]
 num_participants = filtered_results.shape[0]
@@ -145,24 +145,24 @@ num_participants = filtered_results.shape[0]
 print(f"Number of participants with YouTube usage 0-15 min: {num_participants}")
 
 
-filtered_results_youtubeUsage = results[results['youtube_usage'] != "0-15 minutes"]
-num_participants = filtered_results_youtubeUsage.shape[0]
+filtered_results_youtubeUsage_long = results[results['youtube_usage'] != "0-15 minutes"]
+num_participants = filtered_results_youtubeUsage_long.shape[0]
 print(f"Number of participants with YouTube usage > 15 min: {num_participants}")
 
 #print number of participants having accuracy_P > accuracy_N in filtered results_youtubeUsage
-num_better_P_filtered = (filtered_results_youtubeUsage['accuracy_P'] > filtered_results_youtubeUsage['accuracy_N']).sum()
+num_better_P_filtered = (filtered_results_youtubeUsage_long['accuracy_P'] > filtered_results_youtubeUsage_long['accuracy_N']).sum()
 print(f"Number of participants with better accuracy in Personalized (P) than Non-personalized (N) (YouTube usage > 15 min): {num_better_P_filtered}")   
 
 #print number of participants having accuracy_N > accuracy_P in filtered results_youtubeUsage
-num_better_N_filtered = (filtered_results_youtubeUsage['accuracy_N'] > filtered_results_youtubeUsage['accuracy_P']).sum()
+num_better_N_filtered = (filtered_results_youtubeUsage_long['accuracy_N'] > filtered_results_youtubeUsage_long['accuracy_P']).sum()
 print(f"Number of participants with better accuracy in Non-personalized (N) than Personalized (P) (YouTube usage > 15 min): {num_better_N_filtered}")
-num_equal_filtered = (filtered_results_youtubeUsage['accuracy_N'] == filtered_results_youtubeUsage['accuracy_P']).sum()
+num_equal_filtered = (filtered_results_youtubeUsage_long['accuracy_N'] == filtered_results_youtubeUsage_long['accuracy_P']).sum()
 print(f"Number of participants with equal accuracy in both conditions (YouTube usage > 15 min): {num_equal_filtered}")  
 
 #print number of participants having accuracy in first test > second test in filtered results_youtubeUsage
 first_test_filtered = []    
 second_test_filtered = []
-for _, row in filtered_results_youtubeUsage.iterrows():
+for _, row in filtered_results_youtubeUsage_long.iterrows():
     if row['Condition'] == 'PN':
         first_test_filtered.append(row['accuracy_P'])
         second_test_filtered.append(row['accuracy_N'])
@@ -177,6 +177,8 @@ num_equal_tests_filtered = sum(1 for ft, st in zip(first_test_filtered, second_t
 print(f"Number of participants with equal accuracy in both tests (YouTube usage > 15 min): {num_equal_tests_filtered}") 
 
 
+filtered_results_youtubeUsage_short = results[results['youtube_usage'] == "0-15 minutes"]
+
 ###### PLOTS ######
 
 
@@ -187,27 +189,31 @@ import seaborn as sns
 
 
 fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
-sns.histplot(results['accuracy_N'], bins=10, kde=True, ax=axs[0], color='tab:blue')
+sns.histplot(results['accuracy_N'], bins=10, binrange=(0, 1), kde=True, ax=axs[0], color='tab:blue')
+axs[0].set_xlim(0, 1)
 axs[0].set_title('Accuracy Distribution: Non-personalized (N)') 
 axs[0].set_xlabel('Accuracy')
 axs[0].set_ylabel('Frequency')
-sns.histplot(results['accuracy_P'], bins=10, kde=True, ax=axs[1], color='tab:orange')
+
+sns.histplot(results['accuracy_P'], bins=10, binrange=(0, 1), kde=True, ax=axs[1], color='tab:orange')
+axs[1].set_xlim(0, 1)
 axs[1].set_title('Accuracy Distribution: Personalized (P)')
 axs[1].set_xlabel('Accuracy')
+
 plt.tight_layout()
 plt.show()
 
 
-fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
-sns.histplot(filtered_results_youtubeUsage['accuracy_N'], bins=10, kde=True, ax=axs[0], color='tab:blue')
-axs[0].set_title('Accuracy Distribution: Non-personalized (N) in participants with YouTube usage > 15 min') 
-axs[0].set_xlabel('Accuracy')
-axs[0].set_ylabel('Frequency')
-sns.histplot(filtered_results_youtubeUsage['accuracy_P'], bins=10, kde=True, ax=axs[1], color='tab:orange')
-axs[1].set_title('Accuracy Distribution: Personalized (P) in participants with YouTube usage > 15 min')
-axs[1].set_xlabel('Accuracy')
-plt.tight_layout()
-plt.show()
+# fig, axs = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+# sns.histplot(filtered_results_youtubeUsage_long['accuracy_N'], bins=10, kde=True, ax=axs[0], color='tab:blue')
+# axs[0].set_title('Accuracy Distribution: Non-personalized (N) in participants with YouTube usage > 15 min') 
+# axs[0].set_xlabel('Accuracy')
+# axs[0].set_ylabel('Frequency')
+# sns.histplot(filtered_results_youtubeUsage_long['accuracy_P'], bins=10, kde=True, ax=axs[1], color='tab:orange')
+# axs[1].set_title('Accuracy Distribution: Personalized (P) in participants with YouTube usage > 15 min')
+# axs[1].set_xlabel('Accuracy')
+# plt.tight_layout()
+# plt.show()
 
 
 
@@ -234,38 +240,39 @@ ax.set_title('Accuracy by Condition')
 ax.set_xticks(x)
 ax.set_xticklabels(results['id'], rotation=45, ha='right')
 ax.legend()
+plt.ylim(0, 1)
 
 plt.tight_layout()
 plt.show()
 
 
-# box plot for accuracy distribution by condition
-data = [results['accuracy_N'], results['accuracy_P']]
+# # box plot for accuracy distribution by condition
+# data = [results['accuracy_N'], results['accuracy_P']]
 
-plt.figure(figsize=(6, 6))
+# plt.figure(figsize=(6, 6))
 
-plt.boxplot(data, 
-            labels=['Non-personalized (N)', 'Personalized (P)'], patch_artist=True,
-            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
-            medianprops=dict(color='red', linewidth=2),
-            whiskerprops=dict(color='black'),
-            capprops=dict(color='black'),)
+# plt.boxplot(data, 
+#             labels=['Non-personalized (N)', 'Personalized (P)'], patch_artist=True,
+#             boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+#             medianprops=dict(color='red', linewidth=2),
+#             whiskerprops=dict(color='black'),
+#             capprops=dict(color='black'),)
 
-# --- Overlay individual datapoints (jittered) ---
-for i, acc in enumerate(data, start=1):
-    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
-    plt.scatter(x_jitter, 
-                acc, 
-                alpha=0.6, 
-                edgecolors='black', 
-                linewidth=0.5,
-                s=50,)
+# # --- Overlay individual datapoints (jittered) ---
+# for i, acc in enumerate(data, start=1):
+#     x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
+#     plt.scatter(x_jitter, 
+#                 acc, 
+#                 alpha=0.6, 
+#                 edgecolors='black', 
+#                 linewidth=0.5,
+#                 s=50,)
 
-plt.title('Accuracy Comparison: Personalized vs Non-personalized')
-plt.ylabel('Accuracy')
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.tight_layout()
-#plt.show()
+# plt.title('Accuracy Comparison: Personalized vs Non-personalized')
+# plt.ylabel('Accuracy')
+# plt.grid(axis='y', linestyle='--', alpha=0.7)
+# plt.tight_layout()
+# #plt.show()
 
 
 # box plot for accuracy distribution by condition with lines connecting paired samples
@@ -295,6 +302,7 @@ for n, p in zip(results['accuracy_N'], results['accuracy_P']):
 
 plt.title('Paired Accuracy Comparison: Personalized vs Non-personalized')
 plt.ylabel('Accuracy')
+plt.ylim(0, 1)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 #plt.show()
@@ -303,36 +311,6 @@ plt.tight_layout()
 
 
 
-# box plot for accuracy distribution by condition with lines connecting paired samples
-data = [filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P']]
-
-plt.figure(figsize=(6, 6))
-
-plt.boxplot(data, 
-            labels=['Non-personalized (N)', 'Personalized (P)'], patch_artist=True,
-            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
-            medianprops=dict(color='red', linewidth=2),
-            whiskerprops=dict(color='black'),
-            capprops=dict(color='black'),)
-
-# --- Overlay individual datapoints (jittered) ---
-for i, acc in enumerate(data, start=1):
-    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
-    plt.scatter(x_jitter, 
-                acc, 
-                alpha=0.6, 
-                edgecolors='black', 
-                linewidth=0.5,
-                s=50,)
-    # --- Connect paired samples with lines ---
-for n, p in zip(filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P']):
-    plt.plot([1, 2], [n, p], color='gray', alpha=0.6, linewidth=1)
-
-plt.title('Accuracy comparison for YouTube Short usage > 15 min')
-plt.ylabel('Accuracy')
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.tight_layout()
-#plt.show()
 
 
 
@@ -373,6 +351,7 @@ for ft, st in zip(first_test, second_test):
     plt.plot([1, 2], [ft, st], color='gray', alpha=0.6, linewidth=1)
 plt.title('Paired Accuracy Comparison: First Test vs Second Test')
 plt.ylabel('Accuracy')
+plt.ylim(0, 1)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
@@ -436,12 +415,56 @@ plt.legend(handles=[patch_P, patch_N], loc='upper right')
 
 plt.title('Paired Accuracy Comparison: First Test vs Second Test')
 plt.ylabel('Accuracy')
+plt.ylim(0, 1)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
 
 
 
+## -filtered results for YouTube usage --##
+
+# box plot for accuracy distribution by condition with lines connecting paired samples
+data_combined = [filtered_results_youtubeUsage_short['accuracy_N'], filtered_results_youtubeUsage_short['accuracy_P'], filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P']]
+
+labels = ['Non-personalized', 'Personalized', 'Non-personalized', 'Personalized']
+plt.figure(figsize=(8, 6))
+
+plt.boxplot(data_combined, 
+            labels=labels, patch_artist=True,
+            boxprops=dict(facecolor='none', color='black', linewidth=1.2),
+            medianprops=dict(color='red', linewidth=2),
+            whiskerprops=dict(color='black'),
+            capprops=dict(color='black'),
+            widths=0.25,)
+
+# --- Overlay individual datapoints (jittered) ---
+colors = ['tab:blue', 'tab:orange', 'tab:blue', 'tab:orange']
+for i, acc in enumerate(data_combined, start=1):
+    x_jitter = np.random.normal(loc=i, scale=0.05, size=len(acc))  # small horizontal spread
+    plt.scatter(x_jitter, 
+                acc, 
+                alpha=0.6, 
+                edgecolors='black', 
+                linewidth=0.5,
+                s=50,
+                c=colors[i-1],)
+    # --- Connect paired samples with lines ---
+for n, p in zip(filtered_results_youtubeUsage_short['accuracy_N'], filtered_results_youtubeUsage_short['accuracy_P']):
+    plt.plot([1, 2], [n, p], color='gray', alpha=0.6, linewidth=1)
+
+for n, p in zip(filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P']):
+    plt.plot([3, 4], [n, p], color='gray', alpha=0.6, linewidth=1)
+
+plt.axvline(2.5, color='black', linestyle='--', linewidth=1)
+plt.text(1.5, plt.ylim()[0] - 0.15, 'Short (0-15 min)', ha='center', va='center', fontsize=11)
+plt.text(3.5, plt.ylim()[0] - 0.15, 'Long (>15 min)', ha='center', va='center', fontsize=11)
+plt.title('Accuracy comparison by YouTube Shorts usage')
+plt.ylabel('Accuracy')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.ylim(0, 1)
+plt.tight_layout()
+plt.show()
 
 
 
@@ -497,14 +520,18 @@ z = (stat - (n*(n+1))/4) / np.sqrt((n*(n+1)*(2*n+1))/24)
 r = z / np.sqrt(n)
 print(f"Effect size r: {r:.4f}")
 
-
-stat, p = wilcoxon(filtered_results_youtubeUsage['accuracy_N'], filtered_results_youtubeUsage['accuracy_P'])
+## Wilcoxon signed-rank test for filtered YouTube usage > 15 min
+stat, p = wilcoxon(filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P'])
 print(f"Wilcoxon signed-rank test: stat={stat:.4f}, p={p:.4f}") 
 
 if p < 0.05:
     print("Reject H0: Significant difference between conditions. The data provides sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
 else:
     print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
+
+
+
+
 
 
 #compute variability (standard deviation) for each condition
