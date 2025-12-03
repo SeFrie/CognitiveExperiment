@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;s195377&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SeFrie/CognitiveExperiment.git&quot;,
+    &quot;accountId&quot;: &quot;d951cae1-6945-49fa-97be-4d62b61c5be5&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="33bg2C77T1H3sjSkjf9VVlyyE8e" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_clean.executor&quot;: &quot;Run&quot;,
+    &quot;Python.second_test_screen.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_screen.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;fifty__word&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/venello/Repositories/Python/PyCharm/PycharmProjects/CognitiveExperiment/src&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/word_pairs" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9b813553-9bc5-4bc7-9418-1829f05ee1fd" name="Changes" comment="" />
+      <created>1759590975208</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759590975208</updated>
+      <workItem from="1759590976248" duration="2260000" />
+      <workItem from="1759593771056" duration="260000" />
+      <workItem from="1759925201867" duration="3369000" />
+      <workItem from="1759943814757" duration="1560000" />
+      <workItem from="1760516774590" duration="18419000" />
+      <workItem from="1760567766134" duration="2843000" />
+      <workItem from="1760570700602" duration="513000" />
+      <workItem from="1760571478532" duration="242000" />
+      <workItem from="1760571731135" duration="3290000" />
+      <workItem from="1760696289109" duration="128000" />
+      <workItem from="1760696706852" duration="4712000" />
+    </task>
+    <task id="LOCAL-00001" summary="minor excel adjustments">
+      <option name="closed" value="true" />
+      <created>1760517596232</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1760517596232</updated>
+    </task>
+    <task id="LOCAL-00002" summary="minor excel adjustments">
+      <option name="closed" value="true" />
+      <created>1760517696232</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1760517696232</updated>
+    </task>
+    <task id="LOCAL-00003" summary="scrips moved to src folder">
+      <option name="closed" value="true" />
+      <created>1760518066542</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1760518066542</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Memorizing screen pre 2nd test created&#10;Storing to .csv corrected">
+      <option name="closed" value="true" />
+      <created>1760531590016</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760531590016</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Better design on the word lists&#10;new result screen">
+      <option name="closed" value="true" />
+      <created>1760534840735</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1760534840735</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Memorizing time has changes to 4 minutes at each session.">
+      <option name="closed" value="true" />
+      <created>1760535345692</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1760535345692</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Better random selection in the first memorizing and test set, so that memorizing set is randomized before the test set is shown.">
+      <option name="closed" value="true" />
+      <created>1760536090100</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1760536090100</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Next buttons moved to upper right corner of relevant screens">
+      <option name="closed" value="true" />
+      <created>1760539075850</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1760539075850</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Cleaner look on the memorizing screens">
+      <option name="closed" value="true" />
+      <created>1760575006181</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1760575006181</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50">
+      <option name="closed" value="true" />
+      <created>1760710280542</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760710280542</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/fifty_word" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="minor excel adjustments" />
+    <MESSAGE value="scrips moved to src folder" />
+    <MESSAGE value="Memorizing screen pre 2nd test created&#10;Storing to .csv corrected" />
+    <MESSAGE value="Better design on the word lists&#10;new result screen" />
+    <MESSAGE value="Memorizing time has changes to 4 minutes at each session." />
+    <MESSAGE value="Better random selection in the first memorizing and test set, so that memorizing set is randomized before the test set is shown." />
+    <MESSAGE value="Next buttons moved to upper right corner of relevant screens" />
+    <MESSAGE value="Cleaner look on the memorizing screens" />
+    <MESSAGE value="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50" />
+    <option name="LAST_COMMIT_MESSAGE" value="Word list has been reduced to exactly 50 word pairs.&#10;Results are corrected for 25 word instead of 50" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$test_screen.coverage" NAME="test_screen Coverage Results" MODIFIED="1760571756868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$main.coverage" NAME="main Coverage Results" MODIFIED="1760727461892" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$main_clean.coverage" NAME="main_clean Coverage Results" MODIFIED="1760568417314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/CognitiveExperiment$second_test_screen.coverage" NAME="second_test_screen Coverage Results" MODIFIED="1760523989980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+  </component>
+</project>

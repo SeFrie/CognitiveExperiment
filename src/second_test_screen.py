@@ -5,7 +5,7 @@ import random
 
 
 class SecondTestScreen:
-    def __init__(self, root, word_data, unique_id, completion_callback=None):
+    def __init__(self, root, word_data, unique_id, personalization_flag=None, completion_callback=None):
         """
         Initialize the second test screen with randomized question order
 
@@ -13,11 +13,13 @@ class SecondTestScreen:
             root: The tkinter root window
             word_data: DataFrame with word pairs
             unique_id: Unique session identifier
+            personalization_flag: True for Personalized, False for Non-personalized
             completion_callback: Function to call when test is completed
         """
         self.root = root
         self.word_data = word_data
         self.unique_id = unique_id
+        self.personalization_flag = personalization_flag
         self.completion_callback = completion_callback
 
         # Create randomized question order
@@ -27,7 +29,7 @@ class SecondTestScreen:
         # Initialize test variables
         self.current_question = 0
         self.answers = {}  # Store answers by word_id (not question index)
-        self.total_questions = min(20, len(self.word_data))
+        self.total_questions = min(25, len(self.word_data))  # Changed from 20 to 25
 
         # Timer variables
         self.time_remaining = 3 * 60  # 3 minutes in seconds
@@ -55,9 +57,12 @@ class SecondTestScreen:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Timer in upper left corner
-        timer_frame = tk.Frame(main_frame, bg='white')
-        timer_frame.pack(anchor='nw', pady=(0, 10))
+        # Timer and question cards in upper left corner
+        top_left_frame = tk.Frame(main_frame, bg='white')
+        top_left_frame.pack(anchor='nw', pady=(0, 10))
+
+        timer_frame = tk.Frame(top_left_frame, bg='white')
+        timer_frame.pack(pady=(0, 10))
 
         timer_label = tk.Label(timer_frame, text="Time Remaining:", font=("Arial", 12, "bold"), bg='white')
         timer_label.pack()
@@ -66,34 +71,17 @@ class SecondTestScreen:
                                     bg='white', fg='red')
         self.timer_display.pack()
 
-        # Title
-        title = tk.Label(main_frame, text="Second Test Screen", font=("Arial", 24, "bold"), bg='white')
-        title.pack(pady=10)
+        # Question cards under the timer
+        cards_title = tk.Label(top_left_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
+        cards_title.pack(pady=(10, 5))
 
-        # Create two-column layout
-        content_container = tk.Frame(main_frame, bg='white')
-        content_container.pack(fill=tk.BOTH, expand=True)
-
-        # Left column: Question and navigation
-        left_frame = tk.Frame(content_container, bg='white')
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
-
-        # Right column: Question cards
-        right_frame = tk.Frame(content_container, bg='white', width=250)
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y)
-        right_frame.pack_propagate(False)
-
-        # Question cards in right frame
-        cards_title = tk.Label(right_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
-        cards_title.pack(pady=(0, 10))
-
-        # Create 4x5 grid of question cards
-        grid_frame = tk.Frame(right_frame, bg='white')
+        # Create 5x5 grid of question cards
+        grid_frame = tk.Frame(top_left_frame, bg='white')
         grid_frame.pack()
 
         self.question_cards = []
         self.card_frames = []
-        for row in range(4):
+        for row in range(5):  # Changed from 4 to 5
             for col in range(5):
                 num = row * 5 + col + 1
                 if num <= self.total_questions:
@@ -110,12 +98,20 @@ class SecondTestScreen:
                     self.question_cards.append(card)
                     self.card_frames.append(border_frame)
 
-        # Question display in left frame
-        self.question_label = tk.Label(left_frame, text="", font=("Arial", 32, "bold"), bg='white')
+        # Title
+        title = tk.Label(main_frame, text="Second Test Screen", font=("Arial", 24, "bold"), bg='white')
+        title.pack(pady=10)
+
+        # Center area for question display
+        center_frame = tk.Frame(main_frame, bg='white')
+        center_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Question display in center
+        self.question_label = tk.Label(center_frame, text="", font=("Arial", 32, "bold"), bg='white')
         self.question_label.pack(expand=True)
 
-        # Navigation area - bottom of left frame
-        nav_frame = tk.Frame(left_frame, bg='white')
+        # Navigation area - bottom of main frame
+        nav_frame = tk.Frame(main_frame, bg='white')
         nav_frame.pack(side=tk.BOTTOM, pady=20)
 
         # Input instruction
@@ -146,8 +142,8 @@ class SecondTestScreen:
         finish_frame = tk.Frame(nav_frame, bg='white')
         finish_frame.pack(pady=(10, 0))
 
-        self.finish_test_button = tk.Button(finish_frame, text="Finish Second Test (Testing)",
-                                          font=("Arial", 12), bg='purple', fg='white',
+        self.finish_test_button = tk.Button(finish_frame, text="Finish Test",
+                                          font=("Arial", 12), bg='purple', fg='black',
                                           command=self.finish_test, width=25, height=2)
         self.finish_test_button.pack()
 
@@ -289,7 +285,7 @@ class SecondTestScreen:
         self.update_timer()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file in answ_2 column using word_id"""
+        """Save the answers to the CSV file for test_id=1 rows only, filling 'none' for unanswered questions"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -304,22 +300,42 @@ class SecondTestScreen:
                 latest_csv = os.path.join(data_dir, csv_files[-1])
                 df = pd.read_csv(latest_csv)
 
-                # Update the answ_2 column with answers using word_id matching
-                for word_id, answer in self.answers.items():
-                    # Find the row with matching word_id
-                    matching_rows = df[df['word_id'] == word_id]
+                # Ensure word_id columns are the same type (int)
+                df['word_id'] = df['word_id'].astype(int)
+
+                print(f"Saving {len(self.answers)} answers to CSV (Test 2)...")
+
+                # Get all word_ids for this test from word_data
+                all_word_ids = set(self.word_data['word_id'].astype(int).tolist())
+                
+                # Update the answer field for all rows where test_id = 1
+                for word_id in all_word_ids:
+                    word_id = int(word_id)
+                    
+                    # Get the answer if it exists, otherwise use "none"
+                    answer = self.answers.get(word_id, "none")
+
+                    # Find rows that match both word_id AND test_id = 1
+                    matching_rows = df[(df['word_id'] == word_id) & (df['test_id'] == 1)]
                     if not matching_rows.empty:
                         row_index = matching_rows.index[0]
-                        df.loc[row_index, 'answ_2'] = answer
-                        print(f"Saved answer for word_id {word_id}: '{answer}'")
+                        df.loc[row_index, 'answer'] = answer
+                        if answer == "none":
+                            print(f"  Saved word_id {word_id}: 'none' (unanswered)")
+                        else:
+                            print(f"  Saved word_id {word_id}: '{answer}' (Test 2, test_id=1)")
+                    else:
+                        print(f"  WARNING: No matching row found for word_id {word_id} with test_id=1")
 
                 df.to_csv(latest_csv, index=False)
-                print(f"Second test answers saved to {latest_csv}")
+                print(f"✓ Second test answers saved to {latest_csv}")
             else:
                 print("No CSV file found to update")
 
         except Exception as e:
             print(f"Error saving second test answers: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_answers(self):
         """Get the current answers dictionary"""

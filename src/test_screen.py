@@ -1,10 +1,11 @@
 import tkinter as tk
 import pandas as pd
 import os
+import random
 
 
 class TestScreen:
-    def __init__(self, root, word_data, unique_id, completion_callback=None):
+    def __init__(self, root, word_data, unique_id, personalization_flag=None, completion_callback=None):
         """
         Initialize the test screen
 
@@ -12,17 +13,23 @@ class TestScreen:
             root: The tkinter root window
             word_data: DataFrame with word pairs
             unique_id: Unique session identifier
+            personalization_flag: True for Personalized, False for Non-personalized
             completion_callback: Function to call when test is completed
         """
         self.root = root
         self.word_data = word_data
         self.unique_id = unique_id
+        self.personalization_flag = personalization_flag
         self.completion_callback = completion_callback
+
+        # Create randomized question order
+        self.question_indices = list(range(len(self.word_data)))
+        random.shuffle(self.question_indices)  # Randomize the order
 
         # Initialize test variables
         self.current_question = 0
-        self.answers = {}  # Store answers by question index
-        self.total_questions = min(20, len(self.word_data))
+        self.answers = {}  # Store answers by word_id (not question index)
+        self.total_questions = min(25, len(self.word_data))  # Changed from 20 to 25
 
         # Timer variables
         self.time_remaining = 3 * 60  # 3 minutes in seconds
@@ -36,6 +43,8 @@ class TestScreen:
         self.prev_button = None
         self.next_button = None
 
+        print(f"First test created with randomized order: {self.question_indices[:5]}...")
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -48,9 +57,12 @@ class TestScreen:
         main_frame = tk.Frame(self.root, bg='white')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Timer in upper left corner
-        timer_frame = tk.Frame(main_frame, bg='white')
-        timer_frame.pack(anchor='nw', pady=(0, 10))
+        # Timer and question cards in upper left corner
+        top_left_frame = tk.Frame(main_frame, bg='white')
+        top_left_frame.pack(anchor='nw', pady=(0, 10))
+
+        timer_frame = tk.Frame(top_left_frame, bg='white')
+        timer_frame.pack(pady=(0, 10))
 
         timer_label = tk.Label(timer_frame, text="Time Remaining:", font=("Arial", 12, "bold"), bg='white')
         timer_label.pack()
@@ -59,34 +71,17 @@ class TestScreen:
                                     bg='white', fg='red')
         self.timer_display.pack()
 
-        # Title
-        title = tk.Label(main_frame, text="Test Screen", font=("Arial", 24, "bold"), bg='white')
-        title.pack(pady=10)
+        # Question cards under the timer
+        cards_title = tk.Label(top_left_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
+        cards_title.pack(pady=(10, 5))
 
-        # Create two-column layout
-        content_container = tk.Frame(main_frame, bg='white')
-        content_container.pack(fill=tk.BOTH, expand=True)
-
-        # Left column: Question and navigation
-        left_frame = tk.Frame(content_container, bg='white')
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
-
-        # Right column: Question cards
-        right_frame = tk.Frame(content_container, bg='white', width=250)
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y)
-        right_frame.pack_propagate(False)
-
-        # Question cards in right frame
-        cards_title = tk.Label(right_frame, text="Questions", font=("Arial", 12, "bold"), bg='white')
-        cards_title.pack(pady=(0, 10))
-
-        # Create 4x5 grid of question cards
-        grid_frame = tk.Frame(right_frame, bg='white')
+        # Create 5x5 grid of question cards
+        grid_frame = tk.Frame(top_left_frame, bg='white')
         grid_frame.pack()
 
         self.question_cards = []
         self.card_frames = []  # Store the border frames
-        for row in range(4):
+        for row in range(5):  # Changed from 4 to 5
             for col in range(5):
                 num = row * 5 + col + 1
                 if num <= self.total_questions:
@@ -103,12 +98,20 @@ class TestScreen:
                     self.question_cards.append(card)
                     self.card_frames.append(border_frame)
 
-        # Question display in left frame
-        self.question_label = tk.Label(left_frame, text="", font=("Arial", 32, "bold"), bg='white')
+        # Title
+        title = tk.Label(main_frame, text="Test Screen", font=("Arial", 24, "bold"), bg='white')
+        title.pack(pady=10)
+
+        # Center area for question display
+        center_frame = tk.Frame(main_frame, bg='white')
+        center_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Question display in center
+        self.question_label = tk.Label(center_frame, text="", font=("Arial", 32, "bold"), bg='white')
         self.question_label.pack(expand=True)
 
-        # Navigation area - bottom of left frame
-        nav_frame = tk.Frame(left_frame, bg='white')
+        # Navigation area - bottom of main frame
+        nav_frame = tk.Frame(main_frame, bg='white')
         nav_frame.pack(side=tk.BOTTOM, pady=20)
 
         # Input instruction
@@ -139,8 +142,8 @@ class TestScreen:
         finish_frame = tk.Frame(nav_frame, bg='white')
         finish_frame.pack(pady=(10, 0))
 
-        self.finish_test_button = tk.Button(finish_frame, text="Finish Test (Testing)",
-                                          font=("Arial", 12), bg='orange', fg='white',
+        self.finish_test_button = tk.Button(finish_frame, text="Finish Test",
+                                          font=("Arial", 12), bg='orange', fg='black',
                                           command=self.finish_test, width=20, height=2)
         self.finish_test_button.pack()
 
@@ -211,36 +214,59 @@ class TestScreen:
         )
         completion_label.pack(expand=True)
 
+    def get_current_word_id(self):
+        """Get the word_id for the current randomized question"""
+        if self.current_question < len(self.question_indices):
+            randomized_index = self.question_indices[self.current_question]
+            if randomized_index < len(self.word_data):
+                row = self.word_data.iloc[randomized_index]
+                return row.get('word_id', randomized_index + 1)
+        return None
+
     def display_current_question(self):
-        """Display the current question"""
-        if self.current_question < len(self.word_data):
-            row = self.word_data.iloc[self.current_question]
-            icelandic_word = row.get('ice', '')
-            self.question_label.config(text=icelandic_word)
+        """Display the current question (in randomized order)"""
+        if self.current_question < len(self.question_indices):
+            # Get the randomized question index
+            randomized_index = self.question_indices[self.current_question]
 
-            # Show existing answer
-            existing_answer = self.answers.get(self.current_question, '')
-            self.answer_entry.delete(0, tk.END)
-            self.answer_entry.insert(0, existing_answer)
+            if randomized_index < len(self.word_data):
+                row = self.word_data.iloc[randomized_index]
+                icelandic_word = row.get('ice', '')
+                word_id = row.get('word_id', randomized_index + 1)
 
-            # Update card colors
-            self.update_all_cards()
+                self.question_label.config(text=icelandic_word)
 
-            # Update button states
-            self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')
-            self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')
+                # Show existing answer if any (stored by word_id)
+                existing_answer = self.answers.get(word_id, '')
+                self.answer_entry.delete(0, tk.END)
+                self.answer_entry.insert(0, existing_answer)
+
+                # Update card colors
+                self.update_all_cards()
+
+                # Update button states
+                self.prev_button.config(state='normal' if self.current_question > 0 else 'disabled')
+                self.next_button.config(state='normal' if self.current_question < self.total_questions - 1 else 'disabled')
 
     def update_all_cards(self):
         """Update all question card colors based on answer status"""
         for i in range(len(self.question_cards)):
             card = self.question_cards[i]
             border_frame = self.card_frames[i]
-            if i in self.answers and self.answers[i].strip():
-                # Answered - green border
-                border_frame.config(bg='green')
-            else:
-                # Unanswered - red border
-                border_frame.config(bg='red')
+
+            # Get the word_id for this card position
+            if i < len(self.question_indices):
+                randomized_index = self.question_indices[i]
+                if randomized_index < len(self.word_data):
+                    row = self.word_data.iloc[randomized_index]
+                    word_id = row.get('word_id', randomized_index + 1)
+
+                    if word_id in self.answers and self.answers[word_id].strip():
+                        # Answered - green border
+                        border_frame.config(bg='green')
+                    else:
+                        # Unanswered - red border
+                        border_frame.config(bg='red')
 
             # Current question highlight
             if i == self.current_question:
@@ -249,10 +275,12 @@ class TestScreen:
                 card.config(bg='white')
 
     def on_answer_changed(self, event=None):
-        """Handle answer change - save on every keystroke"""
+        """Handle answer change - save on every keystroke using word_id"""
         answer = self.answer_entry.get().strip()
-        self.answers[self.current_question] = answer
-        self.update_all_cards()
+        word_id = self.get_current_word_id()
+        if word_id is not None:
+            self.answers[word_id] = answer
+            self.update_all_cards()
 
     def previous_question(self):
         """Go to previous question"""
@@ -273,7 +301,7 @@ class TestScreen:
             self.display_current_question()
 
     def save_answers_to_csv(self):
-        """Save the answers to the CSV file in answ_1 column"""
+        """Save the answers to the CSV file for test_id=0 rows only, filling 'none' for unanswered questions"""
         try:
             data_dir = "data"
             if not os.path.exists(data_dir):
@@ -288,17 +316,42 @@ class TestScreen:
                 latest_csv = os.path.join(data_dir, csv_files[-1])
                 df = pd.read_csv(latest_csv)
 
-                for question_index, answer in self.answers.items():
-                    if question_index < len(df):
-                        df.loc[question_index, 'answ_1'] = answer
+                # Ensure word_id columns are the same type (int)
+                df['word_id'] = df['word_id'].astype(int)
+
+                print(f"Saving {len(self.answers)} answers to CSV (Test 1)...")
+
+                # Get all word_ids for this test from word_data
+                all_word_ids = set(self.word_data['word_id'].astype(int).tolist())
+                
+                # Update the answer field for all rows where test_id = 0
+                for word_id in all_word_ids:
+                    word_id = int(word_id)
+                    
+                    # Get the answer if it exists, otherwise use "none"
+                    answer = self.answers.get(word_id, "none")
+
+                    # Find rows that match both word_id AND test_id = 0
+                    matching_rows = df[(df['word_id'] == word_id) & (df['test_id'] == 0)]
+                    if not matching_rows.empty:
+                        row_index = matching_rows.index[0]
+                        df.loc[row_index, 'answer'] = answer
+                        if answer == "none":
+                            print(f"  Saved word_id {word_id}: 'none' (unanswered)")
+                        else:
+                            print(f"  Saved word_id {word_id}: '{answer}' (Test 1, test_id=0)")
+                    else:
+                        print(f"  WARNING: No matching row found for word_id {word_id} with test_id=0")
 
                 df.to_csv(latest_csv, index=False)
-                print(f"Answers saved to {latest_csv}")
+                print(f"✓ First test answers saved to {latest_csv}")
             else:
                 print("No CSV file found to update")
 
         except Exception as e:
             print(f"Error saving answers: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_answers(self):
         """Get the current answers dictionary"""
