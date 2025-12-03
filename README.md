@@ -5,7 +5,7 @@ This study evaluates how the memory is influenced by Social Media usage. In this
 
 ## Downloading the code
 
-WARNING: The path to the .xlsx is different in PyCharm and VS Code. The two paths we have used is shown below. 
+The path to the .xlsx is different in PyCharm and VS Code. The two paths we have used is shown below. 
 To distinguish the two, we have used single quotations signs for PyCharm and double for VS Code
 
 PyCharm:
