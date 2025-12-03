@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import glob
 import os
 from io import StringIO
+from matplotlib.ticker import PercentFormatter
 
 
 # --- 1. Load all CSV files ---
@@ -241,7 +242,10 @@ ax.set_title('Accuracy by Condition')
 ax.set_xticks(x)
 ax.set_xticklabels(results['id'], rotation=45, ha='right')
 ax.legend()
-plt.ylim(0, 1)
+# set y-axis from 0% to 100% and format ticks as percentages
+ax.set_ylim(0, 1)
+ax.yaxis.set_major_formatter(PercentFormatter(1.0))  # 1.0 means the data is in fraction (0-1)
+ax.yaxis.set_major_locator(plt.MultipleLocator(0.1))  # steps of 10%
 
 plt.tight_layout()
 plt.show()
