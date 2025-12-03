@@ -376,7 +376,7 @@ for _, row in results.iterrows():
         first_colors.append('tab:blue')     # N
         second_colors.append('tab:orange')  # P
 
-data = [first_test, second_test]
+data = [ , second_test]
 colors = [first_colors, second_colors]
 
 plt.figure(figsize=(6, 6))
