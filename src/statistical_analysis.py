@@ -521,8 +521,8 @@ r = z / np.sqrt(n)
 print(f"Effect size r: {r:.4f}")
 
 ## Wilcoxon signed-rank test for filtered YouTube usage > 15 min
-stat, p = wilcoxon(filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P'])
-print(f"Wilcoxon signed-rank test: stat={stat:.4f}, p={p:.4f}") 
+stat_long, p_long = wilcoxon(filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P'])
+print(f"Wilcoxon signed-rank test (YouTube usage > 15 min): stat={stat_long:.4f}, p={p_long:.4f}") 
 
 if p < 0.05:
     print("Reject H0: Significant difference between conditions. The data provides sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
@@ -530,8 +530,27 @@ else:
     print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
 
 
+## Wilcoxon signed-rank test for filtered YouTube usage 0-15 min
+stat_short, p_short = wilcoxon(filtered_results_youtubeUsage_short['accuracy_N'], filtered_results_youtubeUsage_short['accuracy_P'])
+print(f"Wilcoxon signed-rank test (YouTube usage 0-15 min): stat={stat_short:.4f}, p={p_short:.4f}")
 
+if p < 0.05:
+    print("Reject H0: Significant difference between conditions. The data provides sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
+else:
+    print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
 
+## Compute Wilcoxon rank-sum test for short vs long usage based on accuracy differences between conditions
+from scipy.stats import ranksums
+accuracy_diff_short = filtered_results_youtubeUsage_short['accuracy_P'] - filtered_results_youtubeUsage_short['accuracy_N']
+accuracy_diff_long = filtered_results_youtubeUsage_long['accuracy_P'] - filtered_results_youtubeUsage_long['accuracy_N']
+
+stat_rs, p_rs = ranksums(accuracy_diff_short, accuracy_diff_long)
+print(f"Wilcoxon rank-sum test (Short vs Long YouTube usage): stat={stat_rs:.4f}, p={p_rs:.4f}")
+
+if p_rs < 0.05:
+    print("Reject H0: Significant difference between short and long YouTube usage groups in accuracy differences between conditions.")
+else:
+    print("Fail to reject H0: No significant difference between short and long YouTube usage groups in accuracy differences between conditions.")
 
 
 #compute variability (standard deviation) for each condition
