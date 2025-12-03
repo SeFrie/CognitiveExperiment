@@ -5,6 +5,7 @@ import glob
 import os
 from io import StringIO
 
+
 # --- 1. Load all CSV files ---
 csv_files = glob.glob(os.path.join("data", "*.csv"))
 df = pd.concat([pd.read_csv(f) for f in csv_files], ignore_index=True)
@@ -476,7 +477,7 @@ plt.show()
 
 ## Shapiro Wilk test for normality
 # gives a p-value > 0.05 indicates normality
-from scipy.stats import shapiro, ttest_rel, wilcoxon
+from scipy.stats import shapiro, ttest_rel, wilcoxon, rankdata
 
 
 #stat_N and stat_P are the test statistics for Non-personalized and Personalized conditions respectively, #p_N and p_P are the corresponding p-values.
@@ -506,7 +507,7 @@ else:
 #p: probability of observing the data if H0 is true
 #p < 0.05 indicates significant difference between conditions
 
-stat, p = wilcoxon(results['accuracy_N'], results['accuracy_P'])
+stat, p = wilcoxon(results['accuracy_N'], results['accuracy_P'], alternative='two-sided')
 print(f"Wilcoxon signed-rank test: stat={stat:.4f}, p={p:.4f}") 
 
 if p < 0.05:
@@ -515,10 +516,20 @@ else:
     print("Fail to reject H0: No significant difference between conditions. The data does not provide sufficient evidence to conclude that there is a difference in accuracy between Personalized and Non-personalized conditions.")
 
 # effect size of Wilcoxon test
-n = len(results)
-z = (stat - (n*(n+1))/4) / np.sqrt((n*(n+1)*(2*n+1))/24)
+# Compute signed z from stat using your own differences:
+diffs = results['accuracy_P'] - results['accuracy_N']
+positive_ranks = np.sum(rankdata(abs(diffs))[diffs > 0])
+negative_ranks = np.sum(rankdata(abs(diffs))[diffs < 0])
+
+# Determine direction:
+direction = 1 if positive_ranks > negative_ranks else -1
+
+# Compute z exactly as before:
+n = len(diffs[diffs != 0])
+z = direction * abs((stat - (n*(n+1))/4) / np.sqrt((n*(n+1)*(2*n+1))/24))
+
 r = z / np.sqrt(n)
-print(f"Effect size r: {r:.4f}")
+print("Effect size r:", r)
 
 ## Wilcoxon signed-rank test for filtered YouTube usage > 15 min
 stat_long, p_long = wilcoxon(filtered_results_youtubeUsage_long['accuracy_N'], filtered_results_youtubeUsage_long['accuracy_P'])
